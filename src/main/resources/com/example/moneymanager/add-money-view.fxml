@@ -1,0 +1,69 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.CheckBox?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.TextField?>
+<?import javafx.scene.layout.AnchorPane?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.VBox?>
+<?import javafx.scene.text.Font?>
+
+<AnchorPane fx:id="anchorPane" prefHeight="364.0" prefWidth="185.0" xmlns="http://javafx.com/javafx/19" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.example.moneymanager.controller.AddMoneyController">
+
+    <VBox prefHeight="344.0" prefWidth="168.0" spacing="10">
+      <Label alignment="TOP_CENTER" layoutX="18.0" layoutY="10.0" prefHeight="30.0" prefWidth="161.0" text="Add Move" textAlignment="CENTER">
+         <font>
+            <Font size="20.0" />
+         </font>
+      </Label>
+        <CheckBox fx:id="income" onAction="#onIncome" text="Income">
+         <VBox.margin>
+            <Insets left="8.0" right="8.0" />
+         </VBox.margin></CheckBox>
+        <CheckBox fx:id="expense" onAction="#onExpense" text="Expense">
+         <VBox.margin>
+            <Insets left="8.0" right="8.0" />
+         </VBox.margin></CheckBox>
+
+
+        <Label text="Description:">
+         <VBox.margin>
+            <Insets left="8.0" />
+         </VBox.margin></Label>
+        <TextField fx:id="descriptionMoneyTF" alignment="TOP_CENTER">
+         <VBox.margin>
+            <Insets left="8.0" right="8.0" />
+         </VBox.margin></TextField>
+
+        <Label text="Quantity:">
+         <VBox.margin>
+            <Insets left="8.0" />
+         </VBox.margin></Label>
+        <TextField fx:id="quantityMoneyTF">
+         <VBox.margin>
+            <Insets left="8.0" right="8.0" />
+         </VBox.margin></TextField>
+      <Label layoutX="18.0" layoutY="10.0" text="Date: (dd/MM/yyyy)">
+         <VBox.margin>
+            <Insets left="8.0" />
+         </VBox.margin>
+      </Label>
+      <TextField fx:id="dateMoneyTF" layoutX="18.0" layoutY="102.0">
+         <VBox.margin>
+            <Insets left="8.0" right="8.0" />
+         </VBox.margin>
+      </TextField>
+      <HBox alignment="TOP_CENTER" prefHeight="100.0" prefWidth="200.0" spacing="8.0">
+         <children>
+      
+              <Button onAction="#onAddEmployee" text="Add" />
+              <Button onAction="#onClose" text="Close" />
+         </children>
+         <padding>
+            <Insets bottom="8.0" left="8.0" right="8.0" top="8.0" />
+         </padding>
+      </HBox>
+    </VBox>
+</AnchorPane>
