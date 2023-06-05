@@ -1,13 +1,10 @@
-module com.example.employeemanager {
+module com.example.gamedemo {
     requires javafx.controls;
     requires javafx.fxml;
 
-    opens com.example.moneymanager to javafx.fxml;
-    exports com.example.moneymanager;
 
-    opens com.example.moneymanager.controller to javafx.fxml;
-    exports com.example.moneymanager.controller;
-
-    opens com.example.moneymanager.model to javafx.fxml;
-    exports com.example.moneymanager.model;
+    opens com.example.gamedemo to javafx.fxml;
+    exports com.example.gamedemo;
+    exports com.example.gamedemo.control;
+    opens com.example.gamedemo.control to javafx.fxml;
 }
