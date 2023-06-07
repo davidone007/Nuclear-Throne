@@ -38,7 +38,7 @@ public class Avatar {
     private boolean rightPressed;
     private boolean isAttacking;
 
-    public Avatar(Canvas canvas){
+    public Avatar(Canvas canvas) {
         this.weapon = 1;
         this.state = 0;
         this.canvas = canvas;
@@ -55,56 +55,59 @@ public class Avatar {
         hurtImages = new ArrayList<>();
         deadImages = new ArrayList<>();
 
-        for(int i = 0; i <= 3; i++){
-            Image image = new Image(getClass().getResourceAsStream("/animations/hero/weapon_"+weapon+"/iddle/"+i+".png"));
+        for (int i = 0; i <= 3; i++) {
+            Image image = new Image(
+                    getClass().getResourceAsStream("/animations/hero/weapon_" + weapon + "/iddle/" + i + ".png"));
             idleImages.add(image);
         }
 
-        for(int i = 0; i <= 5; i++){
-            Image image = new Image(getClass().getResourceAsStream("/animations/hero/weapon_"+weapon+"/run/"+i+".png"));
+        for (int i = 0; i <= 5; i++) {
+            Image image = new Image(
+                    getClass().getResourceAsStream("/animations/hero/weapon_" + weapon + "/run/" + i + ".png"));
             runImages.add(image);
         }
 
-        for(int i = 0; i <= 5; i++){
-            Image image = new Image(getClass().getResourceAsStream("/animations/hero/weapon_"+weapon+"/attack/"+i+".png"));
+        for (int i = 0; i <= 5; i++) {
+            Image image = new Image(
+                    getClass().getResourceAsStream("/animations/hero/weapon_" + weapon + "/attack/" + i + ".png"));
             attackImages.add(image);
         }
 
-        for(int i = 1; i <= 1; i++){
-            Image image = new Image(getClass().getResourceAsStream("/animations/hero/weapon_"+weapon+"/hurt/"+i+".png"));
+        for (int i = 1; i <= 1; i++) {
+            Image image = new Image(
+                    getClass().getResourceAsStream("/animations/hero/weapon_" + weapon + "/hurt/" + i + ".png"));
             hurtImages.add(image);
         }
 
-        for(int i = 0; i <= 5; i++){
-            Image image = new Image(getClass().getResourceAsStream("/animations/hero/weapon_"+weapon+"/dead/"+i+".png"));
+        for (int i = 0; i <= 5; i++) {
+            Image image = new Image(
+                    getClass().getResourceAsStream("/animations/hero/weapon_" + weapon + "/dead/" + i + ".png"));
             deadImages.add(image);
         }
     }
 
-    public void paint(){
+    public void paint() {
         onMove();
-        if (state == 0){
-            graphicsContext.drawImage(idleImages.get(frame%3), position.getX(), position.getY());
+        if (state == 0) {
+            graphicsContext.drawImage(idleImages.get(frame % 3), position.getX(), position.getY());
             frame++;
-        }
-        else if(state == 1) {
-            graphicsContext.drawImage(runImages.get(frame%5), position.getX(), position.getY());
+        } else if (state == 1) {
+            graphicsContext.drawImage(runImages.get(frame % 5), position.getX(), position.getY());
             frame++;
-        }
-        else if (state == 2) {
-            graphicsContext.drawImage(attackImages.get(frame%5), position.getX(), position.getY());
+        } else if (state == 2) {
+            graphicsContext.drawImage(attackImages.get(frame % 5), position.getX(), position.getY());
             frame++;
-        }else if (state == 3) {
-            graphicsContext.drawImage(hurtImages.get(frame%1), position.getX(),position.getY());
+        } else if (state == 3) {
+            graphicsContext.drawImage(hurtImages.get(frame % 1), position.getX(), position.getY());
             frame++;
-        }else if (state == 4) {
-            graphicsContext.drawImage(deadImages.get(frame%4), position.getX(),position.getY());
+        } else if (state == 4) {
+            graphicsContext.drawImage(deadImages.get(frame % 4), position.getX(), position.getY());
             frame++;
         }
     }
 
-    public void onKeyPressed(KeyEvent event){
-        switch (event.getCode()){
+    public void onKeyPressed(KeyEvent event) {
+        switch (event.getCode()) {
             case W:
                 state = 1;
                 upPressed = true;
@@ -124,9 +127,9 @@ public class Avatar {
         }
     }
 
-    public void onKeyReleased(KeyEvent event){
+    public void onKeyReleased(KeyEvent event) {
         state = 0;
-        switch (event.getCode()){
+        switch (event.getCode()) {
             case W:
                 upPressed = false;
                 break;
@@ -142,26 +145,26 @@ public class Avatar {
         }
     }
 
-    public void onMouseReleased(MouseEvent event){
-        state=0;
+    public void onMouseReleased(MouseEvent event) {
+        state = 0;
     }
 
-    public void onMousePressed(MouseEvent event){
+    public void onMousePressed(MouseEvent event) {
         state = 2;
-        isAttacking=true;
+        isAttacking = true;
     }
 
-    public void onMove(){
-        if (upPressed){
+    public void onMove() {
+        if (upPressed) {
             position.setY(position.getY() - 10);
         }
-        if (downPressed){
+        if (downPressed) {
             position.setY(position.getY() + 10);
         }
-        if (leftPressed){
+        if (leftPressed) {
             position.setX(position.getX() - 10);
         }
-        if (rightPressed){
+        if (rightPressed) {
             position.setX(position.getX() + 10);
         }
     }
@@ -177,7 +180,6 @@ public class Avatar {
     public void setState(int state) {
         this.state = state;
     }
-    
 
     /**
      * @return Canvas return the canvas

@@ -15,6 +15,7 @@ import java.io.IOException;
 
 public class MainApplication extends Application {
     Pane root = new Pane();
+
     @Override
     public void start(Stage stage) throws IOException {
         FXMLLoader fxmlLoader = new FXMLLoader(MainApplication.class.getResource("hello-view.fxml"));
@@ -34,8 +35,7 @@ public class MainApplication extends Application {
         stage.setWidth(screenWidth);
         stage.setHeight(screenHeight);
         stage.show();
-        
-       
+
     }
 
     public static void main(String[] args) {

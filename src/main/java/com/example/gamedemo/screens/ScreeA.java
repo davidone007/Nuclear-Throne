@@ -12,7 +12,7 @@ import javafx.scene.paint.Color;
 
 import java.util.ArrayList;
 
-public class ScreeA extends BaseScreen{
+public class ScreeA extends BaseScreen {
 
     private Avatar avatar;
 
@@ -34,33 +34,32 @@ public class ScreeA extends BaseScreen{
     @Override
     public void paint() {
         graphicsContext.setFill(Color.BLACK);
-        graphicsContext.fillRect(0,0, canvas.getWidth(), canvas.getHeight());
+        graphicsContext.fillRect(0, 0, canvas.getWidth(), canvas.getHeight());
 
         avatar.paint();
 
-        for (Box b: boxes) {
-           b.paint();
+        for (Box b : boxes) {
+            b.paint();
         }
 
-        for (int i = 0; i< bullets.size(); i++){
+        for (int i = 0; i < bullets.size(); i++) {
             bullets.get(i).paint();
 
-            if(bullets.get(i).getPositionX() > canvas.getWidth()){
+            if (bullets.get(i).getPositionX() > canvas.getWidth()) {
                 bullets.remove(i);
                 i--;
             }
         }
 
-        for (int i = 0; i< boxes.size(); i++){
-            for (int j = 0; j < bullets.size(); j++){
+        for (int i = 0; i < boxes.size(); i++) {
+            for (int j = 0; j < bullets.size(); j++) {
 
                 Box actualBox = boxes.get(i);
                 Bullet actualBullet = bullets.get(j);
 
                 double distanceBullets = Math.sqrt(
                         Math.pow(actualBox.getPosition().getX() - actualBullet.getPositionX(), 2) +
-                                Math.pow(actualBox.getPosition().getY() - actualBullet.getPositionY(), 2)
-                );
+                                Math.pow(actualBox.getPosition().getY() - actualBullet.getPositionY(), 2));
 
                 if (distanceBullets <= 60) {
                     actualBox.setLifes(actualBox.getLifes() - 1);
@@ -70,34 +69,33 @@ public class ScreeA extends BaseScreen{
                         i--;
                     }
                     bullets.remove(j);
-                    break; 
+                    break;
                 }
 
                 System.out.println(distanceBullets);
             }
         }
 
-        for (int i = 0; i< boxes.size(); i++) {
+        for (int i = 0; i < boxes.size(); i++) {
 
             Box actualBox = boxes.get(i);
 
-             double distanceColision = Math.sqrt(
-                        Math.pow(avatar.getPosition().getX() - actualBox.getPosition().getX(), 2) +
-                                Math.pow(avatar.getPosition().getY() - actualBox.getPosition().getY(), 2)
-                );
+            double distanceColision = Math.sqrt(
+                    Math.pow(avatar.getPosition().getX() - actualBox.getPosition().getX(), 2) +
+                            Math.pow(avatar.getPosition().getY() - actualBox.getPosition().getY(), 2));
 
-                if (distanceColision <= 60){
-                    avatar.getPosition().setX(avatar.getPosition().getX() + 70);
-                    avatar.setState(1);
-                  
-                    avatar.paint();
-                  avatar.setState(3);    
-                    avatar.paint();
-                    break;
-                }
+            if (distanceColision <= 60) {
+                avatar.getPosition().setX(avatar.getPosition().getX() + 70);
+                avatar.setState(1);
 
-                System.out.println(distanceColision);
-            
+                avatar.paint();
+                avatar.setState(3);
+                avatar.paint();
+                break;
+            }
+
+            System.out.println(distanceColision);
+
         }
 
     }
@@ -114,42 +112,44 @@ public class ScreeA extends BaseScreen{
 
     @Override
     public void onMousePressed(MouseEvent event) {
-        if(avatar.getWeapon()!=0){
+        if (avatar.getWeapon() != 0) {
             double diffX = event.getX() - (avatar.getPosition().getX());
             double diffY = event.getY() - (avatar.getPosition().getY());
-    
+
             Vector diff = new Vector(diffX, diffY);
-    
+
             diff.normalize();
             diff.setSpeed(35);
             bullets.add(
-                    new Bullet(canvas, new Vector( avatar.getPosition().getX(), avatar.getPosition().getY()), diff,1)
-            );
+                    new Bullet(canvas, new Vector(avatar.getPosition().getX() + 120, avatar.getPosition().getY() + 50),
+                            diff,
+                            1));
             avatar.onMousePressed(event);
         }
     }
 
     @Override
-    public void onMouseDragged(MouseEvent event){
-        if(avatar.getWeapon()!=0){
+    public void onMouseDragged(MouseEvent event) {
+        if (avatar.getWeapon() != 0) {
             double diffX = event.getX() - (avatar.getPosition().getX());
             double diffY = event.getY() - (avatar.getPosition().getY());
-    
+
             Vector diff = new Vector(diffX, diffY);
-    
+
             diff.normalize();
             diff.setSpeed(35);
-    
+
             bullets.add(
-                    new Bullet(canvas, new Vector( avatar.getPosition().getX(), avatar.getPosition().getY()), diff,1)
-            );
+                    new Bullet(canvas, new Vector(avatar.getPosition().getX() + 120, avatar.getPosition().getY() + 50),
+                            diff,
+                            1));
             avatar.onMousePressed(event);
-        }    
-        
+        }
+
     }
 
     @Override
-    public void onMouseReleased(MouseEvent event){
+    public void onMouseReleased(MouseEvent event) {
         avatar.onMouseReleased(event);
     }
 }
