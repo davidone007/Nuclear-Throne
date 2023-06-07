@@ -1,7 +1,7 @@
 package com.example.gamedemo.control;
 
 import com.example.gamedemo.screens.BaseScreen;
-import com.example.gamedemo.screens.ScreeA;
+import com.example.gamedemo.screens.Scenario1;
 import javafx.application.Platform;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
@@ -32,7 +32,7 @@ public class MainController implements Initializable {
         double screenHeight = screen.getBounds().getHeight();
         canvas.setWidth(screenWidth);
         canvas.setHeight(screenHeight);
-        screens.add(new ScreeA(this.canvas));
+        screens.add(new Scenario1(this.canvas));
         canvas.setFocusTraversable(true);
 
         new Thread( () -> {

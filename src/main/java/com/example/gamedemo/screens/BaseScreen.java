@@ -1,5 +1,7 @@
 package com.example.gamedemo.screens;
 
+import com.example.gamedemo.model.Vector;
+
 import javafx.scene.canvas.Canvas;
 import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.input.KeyEvent;
@@ -26,6 +28,8 @@ public abstract class BaseScreen {
     public abstract void onMouseDragged(MouseEvent event);
     
     public abstract void onMouseReleased(MouseEvent event);
+
+    public abstract Vector getRandomPosition();
 
 
 }

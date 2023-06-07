@@ -13,8 +13,6 @@ public class Box extends Thread{
 
     private Vector position;
 
-    private double y;
-
     private boolean isAlive;
 
     public Box(Canvas canvas, Vector position ){
@@ -37,10 +35,6 @@ public class Box extends Thread{
         graphicsContext.setFill(Color.BLUE);
         graphicsContext.fillRect(position.getX(), position.getY(), 70, 70);
     }
-
-    
-
-   
 
     /**
      * @return Canvas return the canvas
