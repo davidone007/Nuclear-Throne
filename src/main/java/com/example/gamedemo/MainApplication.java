@@ -20,7 +20,7 @@ public class MainApplication extends Application {
 
     @Override
     public void start(Stage stage) throws IOException {
-        FXMLLoader fxmlLoader = new FXMLLoader(MainApplication.class.getResource("hello-view.fxml"));
+        FXMLLoader fxmlLoader = new FXMLLoader(MainApplication.class.getResource("game-view.fxml"));
         Screen screen = Screen.getPrimary();
         double screenWidth = screen.getBounds().getWidth();
         double screenHeight = screen.getBounds().getHeight();
@@ -41,7 +41,6 @@ public class MainApplication extends Application {
         // Oculta el puntero del mouse
         scene.setCursor(Cursor.NONE);
 
-
         stage.show();
 
     }
@@ -50,8 +49,4 @@ public class MainApplication extends Application {
         launch();
     }
 
- 
-
-       
-     
-    }
+}

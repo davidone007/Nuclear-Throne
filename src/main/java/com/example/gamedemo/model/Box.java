@@ -4,7 +4,7 @@ import javafx.scene.canvas.Canvas;
 import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.paint.Color;
 
-public class Box extends Thread{
+public class Box extends Thread {
     private Canvas canvas;
 
     private GraphicsContext graphicsContext;
@@ -15,7 +15,7 @@ public class Box extends Thread{
 
     private boolean isAlive;
 
-    public Box(Canvas canvas, Vector position ){
+    public Box(Canvas canvas, Vector position) {
         this.lifes = 3;
         this.canvas = canvas;
         this.graphicsContext = canvas.getGraphicsContext2D();
@@ -31,7 +31,7 @@ public class Box extends Thread{
         isAlive = alive;
     }
 
-    public void paint(){
+    public void paint() {
         graphicsContext.setFill(Color.BLUE);
         graphicsContext.fillRect(position.getX(), position.getY(), 70, 70);
     }

@@ -18,12 +18,8 @@ import javafx.scene.text.Text;
 import javafx.animation.PauseTransition;
 import javafx.util.Duration;
 
-
-
-
 import java.util.ArrayList;
 import java.util.Random;
-
 
 public class Scenario1 extends BaseScreen {
 
@@ -41,18 +37,13 @@ public class Scenario1 extends BaseScreen {
     private BoxWeapon boxWeapon1;
     private BoxWeapon boxWeapon2;
 
-
     private Random random;
-
-
 
     private double mouseX;
     private double mouseY;
 
     private Image pointerImage;
     private Font font;
-
-  
 
     public Scenario1(Canvas canvas) {
         super(canvas);
@@ -67,8 +58,6 @@ public class Scenario1 extends BaseScreen {
         boxWeapons.add(boxWeapon1);
         boxWeapons.add(boxWeapon2);
 
-
-
         Box box = new Box(canvas, getRandomPosition());
         box.start();
         boxes.add(box);
@@ -76,7 +65,7 @@ public class Scenario1 extends BaseScreen {
         pointerImage = new Image(getClass().getResourceAsStream("/animations/pointer/pointer.png"));
         font = Font.loadFont(getClass().getResourceAsStream("/fonts/Super Mario Bros. 2.ttf"), 20);
 
-        lifes= new ArrayList<>();
+        lifes = new ArrayList<>();
 
         // Cargar imagenes de la vida
         addImagesLifes();
@@ -85,9 +74,9 @@ public class Scenario1 extends BaseScreen {
 
     }
 
-    public void addImagesLifes(){
+    public void addImagesLifes() {
         for (int i = 0; i <= 7; i++) {
-            lifes.add(new Image(getClass().getResourceAsStream("/animations/lifes/"+i+".png")));
+            lifes.add(new Image(getClass().getResourceAsStream("/animations/lifes/" + i + ".png")));
         }
     }
 
@@ -103,11 +92,6 @@ public class Scenario1 extends BaseScreen {
 
         return new Vector(x, y);
     }
-
-   
-
-
-
 
     @Override
     public void paint() {
@@ -150,7 +134,7 @@ public class Scenario1 extends BaseScreen {
     }
 
     private void paintWeaponInfo() {
-        String weaponInfo = "Bullets: " + currentBullets;
+        String weaponInfo = "Bullets:" + currentBullets;
         double infoX = 10;
         double infoY = canvas.getHeight() - 30;
 
@@ -158,14 +142,15 @@ public class Scenario1 extends BaseScreen {
         graphicsContext.setFill(Color.WHITE);
         graphicsContext.fillText(weaponInfo, infoX, infoY);
 
-        Image weaponImage = new Image(getClass().getResourceAsStream("/animations/weapons/" + avatar.getWeapon() + ".png"));
+        Image weaponImage = new Image(
+                getClass().getResourceAsStream("/animations/weapons/" + avatar.getWeapon() + ".png"));
 
-       Text text = new Text(weaponInfo);
+        Text text = new Text(weaponInfo);
         text.setFont(graphicsContext.getFont());
         double textWidth = text.getLayoutBounds().getWidth();
 
-        double weaponImageX = infoX + textWidth + 10;   
-        double weaponImageY = infoY - weaponImage.getHeight() + 5;
+        double weaponImageX = infoX + textWidth + 10;
+        double weaponImageY = infoY - weaponImage.getHeight();
 
         graphicsContext.drawImage(weaponImage, weaponImageX, weaponImageY);
     }
@@ -175,8 +160,8 @@ public class Scenario1 extends BaseScreen {
     }
 
     private void paintLifes() {
-      
-       int frame = 0;
+
+        int frame = 0;
 
         int heartSize = 20;
         int heartSpacing = 10;
@@ -187,7 +172,7 @@ public class Scenario1 extends BaseScreen {
             double heartPosX = heartsX + (i * (heartSize + heartSpacing));
             double heartPosY = heartsY;
             for (int j = 0; j < lifes.size(); j++) {
-                graphicsContext.drawImage(lifes.get(frame % 7), heartPosX, heartPosY , heartSize, heartSize);
+                graphicsContext.drawImage(lifes.get(frame % 7), heartPosX, heartPosY, heartSize, heartSize);
                 frame++;
             }
         }
@@ -292,38 +277,36 @@ public class Scenario1 extends BaseScreen {
     }
 
     @Override
-public void onKeyPressed(KeyEvent event) {
-    avatar.onKeyPressed(event);
-  
-    // Verificar si se presionó la tecla de recarga (por ejemplo, la tecla "R")
-    if (event.getCode() == KeyCode.R) {
-        reloadWeapon();
-    }
-}
+    public void onKeyPressed(KeyEvent event) {
+        avatar.onKeyPressed(event);
 
-private void reloadWeapon() {
-    // Verificar si el arma actual del avatar es recargable
-    int currentWeapon = avatar.getWeapon();
-    if (currentWeapon != 0) {
-        // Recargar el arma
-        int bulletsToAdd = 30 - currentBullets;
-        if (bulletsToAdd > 0) {
-            currentBullets += bulletsToAdd;
-            // Limitar la cantidad de balas al máximo (por ejemplo, 30)
-            if (currentBullets > 30) {
-                currentBullets = 30;
+        // Verificar si se presionó la tecla de recarga (por ejemplo, la tecla "R")
+        if (event.getCode() == KeyCode.R) {
+            reloadWeapon();
+        }
+    }
+
+    private void reloadWeapon() {
+        // Verificar si el arma actual del avatar es recargable
+        int currentWeapon = avatar.getWeapon();
+        if (currentWeapon != 0) {
+            // Recargar el arma
+            int bulletsToAdd = 30 - currentBullets;
+            if (bulletsToAdd > 0) {
+                currentBullets += bulletsToAdd;
+                // Limitar la cantidad de balas al máximo (por ejemplo, 30)
+                if (currentBullets > 30) {
+                    currentBullets = 30;
+                }
             }
         }
     }
-}
-
 
     @Override
     public void onKeyReleased(KeyEvent event) {
         avatar.onKeyReleased(event);
 
     }
-    
 
     @Override
     public void onMousePressed(MouseEvent event) {

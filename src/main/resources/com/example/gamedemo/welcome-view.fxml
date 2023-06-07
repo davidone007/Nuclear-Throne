@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.layout.Pane?>
+<?import javafx.scene.control.Button?>
+<?import javafx.geometry.Insets?>
+
+<Pane xmlns="http://javafx.com/javafx"
+      xmlns:fx="http://javafx.com/fxml"
+      fx:controller="com.example.gamedemo.control.WelcomeController">
+
+    <children>
+        <Button text="Play" onAction="#handlePlayButton">
+            <padding>
+                <Insets top="10" right="20" bottom="10" left="20" />
+            </padding>
+        </Button>
+
+        <Button text="Instructions" onAction="#handleInstructionsButton">
+            <padding>
+                <Insets top="10" right="20" bottom="10" left="20" />
+            </padding>
+            <layoutY>
+                <Insets top="60" />
+            </layoutY>
+        </Button>
+    </children>
+
+    <stylesheets>
+        <URL value="@styles.css" />
+    </stylesheets>
+
+</Pane>
