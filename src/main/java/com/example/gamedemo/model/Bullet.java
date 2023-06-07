@@ -2,6 +2,7 @@ package com.example.gamedemo.model;
 
 import javafx.scene.canvas.Canvas;
 import javafx.scene.canvas.GraphicsContext;
+import javafx.scene.image.Image;
 import javafx.scene.paint.Color;
 
 public class Bullet {
@@ -15,19 +16,21 @@ public class Bullet {
     private Vector direction;
     private int size;
     private int speed;
-
-    public Bullet(Canvas canvas, Vector position, Vector direction) {
+    private int weapon;
+    private Image c;
+    public Bullet(Canvas canvas, Vector position, Vector direction,int weapon) {
+        this.weapon = weapon;
         this.canvas = canvas;
         this.graphicsContext = canvas.getGraphicsContext2D();
         this.position = position;
         this.direction =  direction;
-        this.size = 10;
+        this.size = 20;
         this.speed = 10;
+        c= new Image(getClass().getResourceAsStream("/animations/bullets/"+weapon+".png"));
     }
 
     public void paint(){
-        graphicsContext.setFill(Color.YELLOW);
-        graphicsContext.fillOval(position.getX(), position.getY(), size, size);
+        graphicsContext.drawImage(c,position.getX(),position.getY(),size,size);
         position.setX(position.getX() + direction.getX());
         position.setY(position.getY() + direction.getY());
 

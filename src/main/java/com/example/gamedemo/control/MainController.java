@@ -6,6 +6,7 @@ import javafx.application.Platform;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.scene.canvas.Canvas;
+import javafx.stage.Screen;
 
 import java.net.URL;
 import java.util.ArrayList;
@@ -26,6 +27,11 @@ public class MainController implements Initializable {
     public void initialize(URL url, ResourceBundle resourceBundle) {
         isRunning = true;
         screens = new ArrayList<>();
+        Screen screen = Screen.getPrimary();
+        double screenWidth = screen.getBounds().getWidth();
+        double screenHeight = screen.getBounds().getHeight();
+        canvas.setWidth(screenWidth);
+        canvas.setHeight(screenHeight);
         screens.add(new ScreeA(this.canvas));
         canvas.setFocusTraversable(true);
 
@@ -35,7 +41,7 @@ public class MainController implements Initializable {
                     paint();
                 });
                 // esta línea va acá ...
-                pause(50);
+                pause(75);
             }
             // estaba acá ....
         }).start();
@@ -63,6 +69,14 @@ public class MainController implements Initializable {
 
         canvas.setOnMousePressed(event -> {
             screens.get(SCREEN).onMousePressed(event);
+        });
+
+        canvas.setOnMouseDragged(event -> {
+            screens.get(SCREEN).onMouseDragged(event);
+        });
+
+        canvas.setOnMouseReleased(event -> {
+            screens.get(SCREEN).onMouseReleased(event);
         });
     }
 
