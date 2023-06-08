@@ -1,7 +1,8 @@
 package com.example.gamedemo.control;
 
 import com.example.gamedemo.model.*;
-import com.example.gamedemo.screens.Scenario;
+import com.example.gamedemo.screens.BaseScreen;
+import javafx.application.Platform;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.scene.canvas.Canvas;
@@ -20,237 +21,81 @@ import java.util.ArrayList;
 import java.util.Random;
 import java.util.ResourceBundle;
 
-public class MainController implements Initializable, Runnable {
+public class MainController implements Initializable {
 
     @FXML
     private Canvas canvas;
 
     private boolean isRunning;
 
-    private final int FPS = 60;
+    private int actualScreen;
 
-    public static int SCREEN = 0;
-
-    private ArrayList<Scenario> scenarios;
-
-    private Thread gameThread;
-
-    private Avatar avatar;
-    private ArrayList<Enemy> enemies;
-    private ArrayList<Bullet> bullets;
-    private int currentBullets;
-    private ArrayList<BoxWeapon> boxWeapons;
-    private ArrayList<Image> lifes;
-    private BoxWeapon boxWeapon1;
-    private BoxWeapon boxWeapon2;
-    private Random random;
-    private Font font;
+    private int animationFrame;
 
     private GraphicsContext graphicsContext;
+    private Avatar avatar;
+    private ArrayList<BaseScreen> screens;
+    private ArrayList<Image> screenImages;
+    private ArrayList<Image> lifes;
+    private ArrayList<Enemy> enemies;
+    private ArrayList<Bullet> bullets;
+    private ArrayList<BoxWeapon> boxWeapons;
+    private Random random;
+    private int currentBullets;
+    private Font font;
+    private ArrayList<Image> weaponImage;
+    private Text text;
+    private String weaponInfo;
+    private double mouseX;
+    private double mouseY;
+    private Image pointerImage;
 
-    @Override
     public void initialize(URL url, ResourceBundle resourceBundle) {
+        random = new Random();
         isRunning = true;
-        scenarios = new ArrayList<>();
+        actualScreen = 1;
+        screens = new ArrayList<>(4);
+        screenImages= new ArrayList<>(3);
         Screen screen = Screen.getPrimary();
         double screenWidth = screen.getBounds().getWidth();
         double screenHeight = screen.getBounds().getHeight();
         canvas.setWidth(screenWidth);
         canvas.setHeight(screenHeight);
-        gameThread = new Thread(this);
         graphicsContext = canvas.getGraphicsContext2D();
-        canvas.setOnKeyPressed(this::onKeyPressed);
-        canvas.setOnKeyReleased(this::onKeyReleased);
-        canvas.setOnMousePressed(this::onMousePressed);
-        canvas.setOnMouseDragReleased(this::onMouseReleased);
-        canvas.setFocusTraversable(true);
-        scenarios.add(new Scenario(this.canvas, 1));
-        random = new Random();
+        avatar = new Avatar(canvas);
+        new Thread(avatar).start();
+        canvas.setOnMouseMoved(event -> onMouseMoved(event));
 
-        avatar = new Avatar(this.canvas);
-        enemies = new ArrayList<>();
-        bullets = new ArrayList<>();
-        currentBullets = 0;
-        boxWeapons = new ArrayList<>();
+        this.animationFrame = 0;
 
         font = Font.loadFont(getClass().getResourceAsStream("/fonts/Super Mario Bros. 2.ttf"), 20);
+        pointerImage = new Image(getClass().getResourceAsStream("/animations/pointer/pointer.png"));
+        currentBullets = 0;
+        boxWeapons = new ArrayList<>(3);
+        bullets = new ArrayList<>(60);
+        lifes = new ArrayList<>(8);
+        enemies = new ArrayList<>(5);
+        weaponImage = new ArrayList<>(4);
+        addImagesScreen();
+        addImagesLifes();
+        addEnemies();
+        addBoxWeapon();
+        addImagesWeapon();
 
-        // Nivel 1
-        scenarios.get(0).setColor(Color.BLACK);
-        new Thread(avatar).start();
-        graphicsContext.setFill(Color.BLACK);
-        graphicsContext.fillRect(0, 0, canvas.getWidth(), canvas.getHeight());
-        Enemy enemy1 = new Enemy(canvas, new Vector(screenWidth - 100, screenHeight - 100), 1);
-        Enemy enemy2 = new Enemy(canvas, new Vector(screenWidth - 100, screenHeight - 100), 1);
-        enemies.add(enemy1);
-        enemies.add(enemy2);
-        new Thread(enemy1).start();
-        new Thread(enemy2).start();
-        boxWeapon1 = new BoxWeapon(canvas, getRandomPosition(), 0, 45);
-        boxWeapon2 = new BoxWeapon(canvas, getRandomPosition(), 1, 45);
-        new Thread(boxWeapon1).start();
-        new Thread(boxWeapon2).start();
-        boxWeapons.add(boxWeapon1);
-        boxWeapons.add(boxWeapon2);
+        canvas.setFocusTraversable(true);
 
-    }
-
-    @Override
-    public void run() {
-        double drawInterval = 1000000000.0 / FPS;
-        double nextDrawTime = System.nanoTime() + drawInterval;
-        while (gameThread != null) {
-            // Dibujar en el lienzo
-            update();
-            repaint();
-            graphicsContext.drawImage(new Image(
-                    getClass().getResourceAsStream("/animations/weapons/" + 0 + ".png")), 100, 100);
-            try {
-                double remainingTime = nextDrawTime - System.nanoTime();
-                remainingTime /= 1000000;
-                if (remainingTime < 0) {
-                    remainingTime = 0;
-                }
-                Thread.sleep((long) remainingTime);
-                nextDrawTime += drawInterval;
-            } catch (InterruptedException e) {
-                e.printStackTrace();
-
+        new Thread(() -> {
+            while (isRunning) {
+                Platform.runLater(() -> {
+                    paint();
+                });
+                // esta línea va acá ...
+                pause(70);
             }
-        }
-    }
+            // estaba acá ....
+        }).start();
 
-    public void update() {
-
-        for (int i = 0; i < enemies.size(); i++) {
-            for (int j = 0; j < bullets.size(); j++) {
-
-                Enemy actualEnemy = enemies.get(i);
-                Bullet actualBullet = bullets.get(j);
-
-                double distance = Math.sqrt(
-                        Math.pow(actualEnemy.getPosition().getX() - actualBullet.getPositionX(), 2) +
-                                Math.pow(actualEnemy.getPosition().getY() - actualBullet.getPositionY(), 2));
-
-                if (distance <= 60) {
-                    enemies.remove(i);
-                    bullets.remove(j);
-                    return;
-                }
-            }
-        }
-
-        avatar.onMove();
-
-    }
-
-    public void repaint() {
-        graphicsContext.setFill(Color.RED);
-
-        String weaponInfo = "Bullets:" + currentBullets;
-        double infoX = 10;
-        double infoY = canvas.getHeight() - 30;
-
-        graphicsContext.setFont(font);
-        graphicsContext.setFill(Color.WHITE);
-        graphicsContext.fillText(weaponInfo, infoX, infoY);
-
-        Image weaponImage = new Image(
-                getClass().getResourceAsStream("/animations/weapons/" + avatar.getWeapon() + ".png"));
-
-        Text text = new Text(weaponInfo);
-        text.setFont(graphicsContext.getFont());
-        double textWidth = text.getLayoutBounds().getWidth();
-
-        double weaponImageX = infoX + textWidth + 10;
-        double weaponImageY = infoY - weaponImage.getHeight();
-
-        graphicsContext.drawImage(weaponImage, weaponImageX, weaponImageY);
-
-        int frame = 0;
-        int heartSize = 20;
-        int heartSpacing = 10;
-        double heartsX = 10;
-        double heartsY = 10;
-
-        for (int i = 0; i < avatar.getLifes(); i++) {
-            double heartPosX = heartsX + (i * (heartSize + heartSpacing));
-            double heartPosY = heartsY;
-            for (int j = 0; j < lifes.size(); j++) {
-                graphicsContext.drawImage(lifes.get(frame % 7), heartPosX, heartPosY, heartSize, heartSize);
-                frame++;
-            }
-        }
-
-        for (int i = 0; i < bullets.size(); i++) {
-            bullets.get(i).draw(graphicsContext);
-
-            if (bullets.get(i).getPositionX() > canvas.getWidth()) {
-                bullets.remove(i);
-                i--;
-            }
-        }
-
-        for (int i = 0; i < boxWeapons.size(); i++) {
-
-            BoxWeapon actualBoxWeapon = boxWeapons.get(i);
-
-            double distanceColision = Math.sqrt(
-                    Math.pow(avatar.getPosition().getX() - actualBoxWeapon.getPositionX(), 2) +
-                            Math.pow(avatar.getPosition().getY() - actualBoxWeapon.getPositionY(), 2));
-
-            if (distanceColision <= 45) {
-
-                if (actualBoxWeapon.getWeapon() == 0) {
-                    boxWeapons.remove(i);
-                    i--;
-                    avatar.setWeapon(1);
-                    currentBullets += 30;
-                    avatar.draw(graphicsContext);
-                } else if (actualBoxWeapon.getWeapon() == 1) {
-                    boxWeapons.remove(i);
-                    i--;
-                    avatar.setWeapon(2);
-                    currentBullets += 30;
-                    avatar.draw(graphicsContext);
-                }
-
-                break;
-
-            }
-
-        }
-
-        for (int i = 0; i < enemies.size(); i++) {
-
-            Enemy actualEnemy = enemies.get(i);
-
-            actualEnemy.draw(graphicsContext);
-
-            double distanceColision = Math.sqrt(
-                    Math.pow(avatar.getPosition().getX() - actualEnemy.getPosition().getX(), 2) +
-                            Math.pow(avatar.getPosition().getY() - actualEnemy.getPosition().getY(), 2));
-
-            if (distanceColision <= 60) {
-                avatar.getPosition().setX(avatar.getPosition().getX() + 70);
-                int state = avatar.getState();
-                if (state == 2 || state == 0) {
-                    avatar.setState(0);
-                    avatar.draw(graphicsContext);
-                    avatar.setState(6);
-                    avatar.draw(graphicsContext);
-                } else {
-                    avatar.setState(1);
-                    avatar.draw(graphicsContext);
-                    avatar.setState(7);
-                    avatar.draw(graphicsContext);
-                }
-                break;
-            }
-
-        }
-
-        avatar.draw(graphicsContext);
+        initEvents();
     }
 
     public Vector getRandomPosition() {
@@ -261,10 +106,54 @@ public class MainController implements Initializable, Runnable {
         return new Vector(x, y);
     }
 
+    public void addImagesScreen() {
+        for (int i = 1; i <= 4; i++) {
+            screenImages.add(new Image(
+                    getClass().getResourceAsStream("/scenarios/scenario_" + i + ".png")));
+        }
+    }
+
+    public void addImagesWeapon() {
+        for (int i = 0; i <= 2; i++) {
+            weaponImage.add(new Image(
+                    getClass().getResourceAsStream("/animations/weapons/" + i + ".png")));
+        }
+
+    }
+
     public void addImagesLifes() {
         for (int i = 0; i <= 7; i++) {
             lifes.add(new Image(getClass().getResourceAsStream("/animations/lifes/" + i + ".png")));
         }
+    }
+
+    public void addEnemies() {
+
+        Enemy newEnemy = new Enemy(canvas, getRandomPosition(), actualScreen, avatar);
+        enemies.add(newEnemy);
+        new Thread(newEnemy).start();
+
+        Enemy newEnemy2 = new Enemy(canvas, getRandomPosition(), actualScreen, avatar);
+        enemies.add(newEnemy2);
+        new Thread(newEnemy2).start();
+
+        Enemy newEnemy3 = new Enemy(canvas, getRandomPosition(), actualScreen, avatar);
+        enemies.add(newEnemy3);
+        new Thread(newEnemy3).start();
+    }
+
+    public void addBoxWeapon() {
+        for (int index = 0; index < 2; index++) {
+            BoxWeapon boxWeapon = new BoxWeapon(canvas, getRandomPosition(), index, 50);
+            boxWeapons.add(boxWeapon);
+            new Thread(boxWeapon).start();
+
+        }
+    }
+
+    public void onMouseMoved(MouseEvent event) {
+        mouseX = (event.getX());
+        mouseY = (event.getY());
     }
 
     public void onKeyPressed(KeyEvent event) {
@@ -333,8 +222,227 @@ public class MainController implements Initializable, Runnable {
         }
     }
 
+    public void paint() {
+
+        // Acomodar el contexto grafico (Screen)
+        graphicsContext.drawImage( screenImages.get(0), 0,0,canvas.getWidth(),canvas.getHeight());
+
+        // Insertar al avatar
+        avatar.paint();
+
+        // Seguir avatar
+        for (Enemy enemy : enemies) {
+            enemy.follow();
+        }
+
+        // Insertar cajas de armas en el screen
+        for (BoxWeapon bW : boxWeapons) {
+            bW.paint();
+        }
+
+        // Insertar enemigos en el screen
+
+        for (Enemy enemy : enemies) {
+            enemy.paint();
+        }
+
+        // Bucle para la colision con el enemigo
+        paintColisionEnemy();
+
+        // Bucle para la colision con las cajas de armas
+        paintColisionBoxWeapon();
+
+        // Bucle para disparar
+        paintShoot();
+
+        // Bucle para las vidas
+        paintLifes();
+
+        // Dibujar informacion del arma
+        paintWeaponInfo();
+
+        // Dibuja el puntero
+        paintPointer();
+
+    }
+
+    private void paintPointer() {
+        graphicsContext.drawImage(pointerImage, mouseX, mouseY);
+    }
+
+    private void paintWeaponInfo() {
+        weaponInfo = "Bullets:" + currentBullets;
+        double infoX = 10;
+        double infoY = canvas.getHeight() - 30;
+        text = new Text(weaponInfo);
+        text.setFont(graphicsContext.getFont());
+
+        graphicsContext.setFont(font);
+        graphicsContext.setFill(Color.WHITE);
+        graphicsContext.fillText(weaponInfo, infoX, infoY);
+        double textWidth = text.getLayoutBounds().getWidth();
+
+        double weaponImageX = infoX + textWidth + 10;
+        double weaponImageY = infoY - weaponImage.get(avatar.getWeapon()).getHeight();
+
+        graphicsContext.drawImage(weaponImage.get(avatar.getWeapon()), weaponImageX, weaponImageY);
+    }
+
+    private void paintLifes() {
+        int heartSize = 20;
+        int heartSpacing = 10;
+        double heartsX = 10;
+        double heartsY = 10;
+
+        for (int i = 0; i < avatar.getLives(); i++) {
+            double heartPosX = heartsX + (i * (heartSize + heartSpacing));
+            double heartPosY = heartsY;
+
+            // Obtener la imagen correspondiente al frame de animación actual
+            Image heartImage = lifes.get(animationFrame % 7);
+
+            graphicsContext.drawImage(heartImage, heartPosX, heartPosY, heartSize, heartSize);
+        }
+
+        // Actualizar el frame de animación para el próximo ciclo
+        animationFrame++;
+    }
+
+    public void paintColisionBoxWeapon() {
+        // Bucle para la colision con las cajas de armas
+        for (int i = 0; i < boxWeapons.size(); i++) {
+
+            BoxWeapon actualBoxWeapon = boxWeapons.get(i);
+
+            double distanceColision = Math.sqrt(
+                    Math.pow(avatar.getPosition().getX() - actualBoxWeapon.getPositionX(), 2) +
+                            Math.pow(avatar.getPosition().getY() - actualBoxWeapon.getPositionY(), 2));
+
+            if (distanceColision <= 60) {
+
+                if (actualBoxWeapon.getWeapon() == 0) {
+                    boxWeapons.remove(i);
+                    i--;
+                    avatar.setWeapon(1);
+                    currentBullets = 30;
+                    avatar.paint();
+                } else if (actualBoxWeapon.getWeapon() == 1) {
+                    boxWeapons.remove(i);
+                    i--;
+                    avatar.setWeapon(2);
+                    currentBullets = 30;
+                    avatar.paint();
+                } else {
+                    boxWeapons.remove(i);
+                    i--;
+                    avatar.setWeapon(1);
+                    currentBullets = 30;
+                    avatar.paint();
+                }
+
+                break;
+
+            }
+
+        }
+
+    }
+
+    public void paintColisionEnemy() {
+
+        // Bucle para la colision con el enemigo
+        for (int i = 0; i < enemies.size(); i++) {
+
+            Enemy actualEnemy = enemies.get(i);
+
+            double distanceColision = Math.sqrt(
+                    Math.pow(avatar.getPosition().getX() - actualEnemy.getPosition().getX(), 2) +
+                            Math.pow(avatar.getPosition().getY() - actualEnemy.getPosition().getY(), 2));
+
+            if (distanceColision <= 80) {
+
+                avatar.setLives(avatar.getLives() - 1);
+                if (avatar.getLives() == 1) {
+                    avatar.setState(8);
+                    avatar.paint();
+                    avatar.setIsAlive(false);
+                    break;
+                } else {
+                    int state = avatar.getState();
+                    if (state == 2 || state == 0) {
+                        avatar.getPosition().setX(avatar.getPosition().getX() - 300);
+                        avatar.setState(0);
+                        avatar.paint();
+                        avatar.setState(6);
+                        avatar.paint();
+                    } else {
+                        avatar.getPosition().setX(avatar.getPosition().getX() + 300);
+                        avatar.setState(1);
+                        avatar.paint();
+                        avatar.setState(7);
+                        avatar.paint();
+                    }
+                    break;
+                }
+
+            }
+
+        }
+
+    }
+
+    public void paintShoot() {
+
+        for (int i = 0; i < bullets.size(); i++) {
+            bullets.get(i).paint();
+
+            if (bullets.get(i).getPositionX() > canvas.getWidth()) {
+                bullets.remove(i);
+                i--;
+            }
+        }
+
+        for (int i = 0; i < enemies.size(); i++) {
+            for (int j = 0; j < bullets.size(); j++) {
+
+                int actualEnemyLives = enemies.get(i).getLives();
+
+                Enemy actualEnemy = enemies.get(i);
+                Bullet actualBullet = bullets.get(j);
+
+                double distance = Math.sqrt(
+                        Math.pow(actualEnemy.getPosition().getX() - actualBullet.getPositionX(), 2) +
+                                Math.pow(actualEnemy.getPosition().getY() - actualBullet.getPositionY(), 2));
+
+                if (distance <= 80) {
+                    bullets.remove(j);
+                    enemies.get(i).setLives(actualEnemyLives - 1);
+                    if (actualEnemyLives == 1) {
+                        enemies.get(i).setState(8);
+                        enemies.get(i).paint();
+                        enemies.get(i).setIsAlive(false);
+                        enemies.remove(i);
+                        i--;
+                        return;
+                    }
+
+                }
+            }
+        }
+    }
+
     public void setRunning(boolean running) {
         isRunning = running;
+    }
+
+    public void initEvents() {
+        canvas.setOnKeyPressed(this::onKeyPressed);
+
+        canvas.setOnKeyReleased(this::onKeyReleased);
+
+        canvas.setOnMousePressed(this::onMousePressed);
+
+        canvas.setOnMouseReleased(this::onMouseReleased);
     }
 
     private void pause(int time) {
@@ -371,6 +479,216 @@ public class MainController implements Initializable, Runnable {
      */
     public void setIsRunning(boolean isRunning) {
         this.isRunning = isRunning;
+    }
+
+    /**
+     * @return int return the actualScreen
+     */
+    public int getActualScreen() {
+        return actualScreen;
+    }
+
+    /**
+     * @param actualScreen the actualScreen to set
+     */
+    public void setActualScreen(int actualScreen) {
+        this.actualScreen = actualScreen;
+    }
+
+    /**
+     * @param graphicsContext the graphicsContext to set
+     */
+    public void setGraphicsContext(GraphicsContext graphicsContext) {
+        this.graphicsContext = graphicsContext;
+    }
+
+    /**
+     * @return Avatar return the avatar
+     */
+    public Avatar getAvatar() {
+        return avatar;
+    }
+
+    /**
+     * @param avatar the avatar to set
+     */
+    public void setAvatar(Avatar avatar) {
+        this.avatar = avatar;
+    }
+
+    /**
+     * @return ArrayList<BaseScreen> return the screens
+     */
+    public ArrayList<BaseScreen> getScreens() {
+        return screens;
+    }
+
+    /**
+     * @param screens the screens to set
+     */
+    public void setScreens(ArrayList<BaseScreen> screens) {
+        this.screens = screens;
+    }
+
+    /**
+     * @return ArrayList<Image> return the lifes
+     */
+    public ArrayList<Image> getLifes() {
+        return lifes;
+    }
+
+    /**
+     * @param lifes the lifes to set
+     */
+    public void setLifes(ArrayList<Image> lifes) {
+        this.lifes = lifes;
+    }
+
+    /**
+     * @return ArrayList<Enemy> return the enemies
+     */
+    public ArrayList<Enemy> getEnemies() {
+        return enemies;
+    }
+
+    /**
+     * @param enemies the enemies to set
+     */
+    public void setEnemies(ArrayList<Enemy> enemies) {
+        this.enemies = enemies;
+    }
+
+    /**
+     * @return ArrayList<Bullet> return the bullets
+     */
+    public ArrayList<Bullet> getBullets() {
+        return bullets;
+    }
+
+    /**
+     * @param bullets the bullets to set
+     */
+    public void setBullets(ArrayList<Bullet> bullets) {
+        this.bullets = bullets;
+    }
+
+    /**
+     * @return ArrayList<BoxWeapon> return the boxWeapons
+     */
+    public ArrayList<BoxWeapon> getBoxWeapons() {
+        return boxWeapons;
+    }
+
+    /**
+     * @param boxWeapons the boxWeapons to set
+     */
+    public void setBoxWeapons(ArrayList<BoxWeapon> boxWeapons) {
+        this.boxWeapons = boxWeapons;
+    }
+
+    /**
+     * @param random the random to set
+     */
+    public void setRandom(Random random) {
+        this.random = random;
+    }
+
+    /**
+     * @return int return the currentBullets
+     */
+    public int getCurrentBullets() {
+        return currentBullets;
+    }
+
+    /**
+     * @param currentBullets the currentBullets to set
+     */
+    public void setCurrentBullets(int currentBullets) {
+        this.currentBullets = currentBullets;
+    }
+
+    /**
+     * @return ArrayList<Image> return the weaponImage
+     */
+    public ArrayList<Image> getWeaponImage() {
+        return weaponImage;
+    }
+
+    /**
+     * @param weaponImage the weaponImage to set
+     */
+    public void setWeaponImage(ArrayList<Image> weaponImage) {
+        this.weaponImage = weaponImage;
+    }
+
+    /**
+     * @return Text return the text
+     */
+    public Text getText() {
+        return text;
+    }
+
+    /**
+     * @param text the text to set
+     */
+    public void setText(Text text) {
+        this.text = text;
+    }
+
+    /**
+     * @return String return the weaponInfo
+     */
+    public String getWeaponInfo() {
+        return weaponInfo;
+    }
+
+    /**
+     * @param weaponInfo the weaponInfo to set
+     */
+    public void setWeaponInfo(String weaponInfo) {
+        this.weaponInfo = weaponInfo;
+    }
+
+    /**
+     * @return double return the mouseX
+     */
+    public double getMouseX() {
+        return mouseX;
+    }
+
+    /**
+     * @param mouseX the mouseX to set
+     */
+    public void setMouseX(double mouseX) {
+        this.mouseX = mouseX;
+    }
+
+    /**
+     * @return double return the mouseY
+     */
+    public double getMouseY() {
+        return mouseY;
+    }
+
+    /**
+     * @param mouseY the mouseY to set
+     */
+    public void setMouseY(double mouseY) {
+        this.mouseY = mouseY;
+    }
+
+    /**
+     * @return Image return the pointerImage
+     */
+    public Image getPointerImage() {
+        return pointerImage;
+    }
+
+    /**
+     * @param pointerImage the pointerImage to set
+     */
+    public void setPointerImage(Image pointerImage) {
+        this.pointerImage = pointerImage;
     }
 
 }

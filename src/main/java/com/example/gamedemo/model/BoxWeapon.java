@@ -5,7 +5,7 @@ import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.image.Image;
 import javafx.scene.paint.Color;
 
-public class BoxWeapon extends Drawing implements Runnable {
+public class BoxWeapon implements Runnable{
 
     // Elementos graficos
     private Canvas canvas;
@@ -27,22 +27,21 @@ public class BoxWeapon extends Drawing implements Runnable {
     }
 
     @Override
-    public void draw(GraphicsContext graphicsContext) {
-        graphicsContext.drawImage(typeBullet, position.getX(), position.getY(), size, size);
-        position.setX(position.getX());
-        position.setY(position.getY());
-
-    }
-
-    @Override
     public void run() {
         while (true) {
             try {
-                Thread.sleep(120);
+                Thread.sleep(0);
             } catch (InterruptedException e) {
                 throw new RuntimeException(e);
             }
         }
+    }
+
+    public void paint() {
+        graphicsContext.drawImage(typeBullet, position.getX(), position.getY(), size, size);
+        position.setX(position.getX());
+        position.setY(position.getY());
+
     }
 
     public double getPositionX() {

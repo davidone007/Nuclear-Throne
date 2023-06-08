@@ -5,12 +5,15 @@ import javafx.scene.canvas.Canvas;
 import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.image.Image;
 import javafx.scene.input.KeyEvent;
+import javafx.scene.input.MouseButton;
 import javafx.scene.input.MouseEvent;
 
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map;
 
 
-public class Avatar extends Drawing implements Runnable {
+public class Avatar implements Runnable{
 
     // Elementos graficos
     private Canvas canvas;
@@ -20,7 +23,9 @@ public class Avatar extends Drawing implements Runnable {
     private ArrayList<Image> attackImages;
     private ArrayList<Image> deadImages;
     private ArrayList<Image> hurtImages;
+    private Map<String, Image> imageCache;
     private int weapon;
+    private boolean isAlive;
 
     // referencias espaciales
     private double posX;
@@ -37,28 +42,39 @@ public class Avatar extends Drawing implements Runnable {
     private boolean leftPressed;
     private boolean rightPressed;
     private boolean isAttacking;
-    private int lifes;
+    private int lives;
 
     public Avatar(Canvas canvas) {
         this.weapon = 0;
         this.state = 0;
         this.canvas = canvas;
         this.graphicsContext = canvas.getGraphicsContext2D();
+        this.isAlive= true;
 
         this.position = new Vector(100, 100);
 
         this.posX = 100;
         this.posY = 100;
-
-        this.lifes = 3;
+        this.lives = 5;
 
         idleImages = new ArrayList<>();
         runImages = new ArrayList<>();
         attackImages = new ArrayList<>();
         hurtImages = new ArrayList<>();
         deadImages = new ArrayList<>();
+        imageCache = new HashMap<>();
         chargeImages();
-        
+    }
+
+    @Override
+    public void run() {
+        while (isAlive) {
+            try {
+                Thread.sleep(0);
+            } catch (InterruptedException e) {
+                throw new RuntimeException(e);
+            }
+        }
     }
 
     public void clearImages(){
@@ -69,40 +85,46 @@ public class Avatar extends Drawing implements Runnable {
         deadImages.clear();
     }
 
-    public void chargeImages(){
-        clearImages();
-        for (int i = 0; i <= 7; i++) {
-            Image image = new Image(
-                    getClass().getResourceAsStream("/animations/hero/weapon_" + weapon + "/iddle/" + i + ".png"));
-            idleImages.add(image);
-        }
+    public void chargeImages() {
+    clearImages();
+    for (int i = 0; i <= 7; i++) {
+        String imagePath = "/animations/hero/weapon_" + weapon + "/iddle/" + i + ".png";
+        idleImages.add(getImageFromCache(imagePath));
+    }
 
-        for (int i = 0; i <= 11; i++) {
-            Image image = new Image(
-                    getClass().getResourceAsStream("/animations/hero/weapon_" + weapon + "/run/" + i + ".png"));
-            runImages.add(image);
-        }
+    for (int i = 0; i <= 11; i++) {
+        String imagePath = "/animations/hero/weapon_" + weapon + "/run/" + i + ".png";
+        runImages.add(getImageFromCache(imagePath));
+    }
 
-        for (int i = 0; i <= 11; i++) {
-            Image image = new Image(
-                    getClass().getResourceAsStream("/animations/hero/weapon_" + weapon + "/attack/" + i + ".png"));
-            attackImages.add(image);
-        }
+    for (int i = 0; i <= 11; i++) {
+        String imagePath = "/animations/hero/weapon_" + weapon + "/attack/" + i + ".png";
+        attackImages.add(getImageFromCache(imagePath));
+    }
 
-        for (int i = 1; i <= 2; i++) {
-            Image image = new Image(
-                    getClass().getResourceAsStream("/animations/hero/weapon_" + weapon + "/hurt/" + i + ".png"));
-            hurtImages.add(image);
-        }
+    for (int i = 0; i <= 1; i++) {
+        String imagePath = "/animations/hero/weapon_" + weapon + "/hurt/" + i + ".png";
+        hurtImages.add(getImageFromCache(imagePath));
+    }
 
-        for (int i = 0; i <= 5; i++) {
-            Image image = new Image(
-                    getClass().getResourceAsStream("/animations/hero/weapon_" + weapon + "/dead/" + i + ".png"));
-            deadImages.add(image);
+    for (int i = 0; i <= 5; i++) {
+        String imagePath = "/animations/hero/weapon_" + weapon + "/dead/" + i + ".png";
+        deadImages.add(getImageFromCache(imagePath));
+    }
+}
+
+
+    private Image getImageFromCache(String imagePath) {
+        if (imageCache.containsKey(imagePath)) {
+            return imageCache.get(imagePath);
+        } else {
+            Image image = new Image(getClass().getResourceAsStream(imagePath));
+            imageCache.put(imagePath, image);
+            return image;
         }
     }
-    @Override
-    public void draw(GraphicsContext graphicsContext) {
+
+    public void paint() {
         chargeImages();
         onMove();
         if (state == 0) {
@@ -127,26 +149,15 @@ public class Avatar extends Drawing implements Runnable {
             graphicsContext.drawImage(attackImages.get((frame % 5)+6), position.getX(), position.getY());
             frame++;
         } else if (state == 6) {
-            graphicsContext.drawImage(hurtImages.get(frame % 1), position.getX(), position.getY());
-            frame++;
+            graphicsContext.drawImage(hurtImages.get(0), position.getX(), position.getY());
+            
         } else if (state == 7) {
             //left hurt
-            graphicsContext.drawImage(hurtImages.get((frame % 1)+2), position.getX(), position.getY());
+            graphicsContext.drawImage(hurtImages.get((frame % 1)), position.getX(), position.getY());
             frame++;
         } else if (state == 8) {
             graphicsContext.drawImage(deadImages.get(frame % 4), position.getX(), position.getY());
             frame++;
-        }
-    }
-
-    @Override
-    public void run() {
-        while (true) {
-            try {
-                Thread.sleep(120);
-            } catch (InterruptedException e) {
-                throw new RuntimeException(e);
-            }
         }
     }
 
@@ -532,15 +543,44 @@ public class Avatar extends Drawing implements Runnable {
     /**
      * @return int return the lives
      */
-    public int getLifes() {
-        return lifes;
+    public int getLives() {
+        return lives;
     }
 
     /**
-     * @param lifes the lives to set
+     * @param lives the lives to set
      */
-    public void setLifes(int lifes) {
-        this.lifes = lifes;
+    public void setLives(int lives) {
+        this.lives = lives;
+    }
+
+
+    /**
+     * @return Map<String, Image> return the imageCache
+     */
+    public Map<String, Image> getImageCache() {
+        return imageCache;
+    }
+
+    /**
+     * @param imageCache the imageCache to set
+     */
+    public void setImageCache(Map<String, Image> imageCache) {
+        this.imageCache = imageCache;
+    }
+
+    /**
+     * @return boolean return the isAlive
+     */
+    public boolean isIsAlive() {
+        return isAlive;
+    }
+
+    /**
+     * @param isAlive the isAlive to set
+     */
+    public void setIsAlive(boolean isAlive) {
+        this.isAlive = isAlive;
     }
 
 }

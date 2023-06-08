@@ -8,8 +8,7 @@ import javafx.scene.input.MouseEvent;
 
 import java.util.ArrayList;
 
-
-public class Enemy extends Drawing implements Runnable {
+public class Enemy implements Runnable {
 
     // Elementos graficos
     private Canvas canvas;
@@ -20,6 +19,7 @@ public class Enemy extends Drawing implements Runnable {
     private ArrayList<Image> deadImages;
     private ArrayList<Image> hurtImages;
     private int scenario;
+    private Avatar avatar;
 
     // referencias espaciales
     private double posX;
@@ -37,17 +37,20 @@ public class Enemy extends Drawing implements Runnable {
     private boolean rightPressed;
     private boolean isAttacking;
     private int lives;
+    private boolean isAlive;
 
-    public Enemy(Canvas canvas, Vector position, int scenario) {
-        this.scenario= scenario;
+    public Enemy(Canvas canvas, Vector position, int scenario, Avatar avatar) {
+        this.scenario = scenario;
         this.state = 0;
         this.canvas = canvas;
         this.graphicsContext = canvas.getGraphicsContext2D();
+        this.avatar = avatar;
 
         this.position = position;
 
         this.posX = position.getX();
         this.posY = position.getY();
+        this.isAlive = true;
 
         this.lives = 3;
 
@@ -60,207 +63,124 @@ public class Enemy extends Drawing implements Runnable {
 
     }
 
-    public void clearImages(){
-        idleImages.clear();
-        runImages.clear();
-        attackImages.clear();
-        hurtImages.clear();
-        deadImages.clear();
+    @Override
+    public void run() {
+        while (isAlive) {
+            // Lógica de actualización del estado del enemigo
+            try {
+                Thread.sleep(0);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+        }
     }
 
-    public void chargeImages(){
-        clearImages();
+    public void follow() {
+
+        if (avatar.getState() >= 0 && avatar.getState() <= 3) {
+            state = avatar.getState();
+        }
+
+        // Calcular la dirección hacia la cual moverse
+        double diffX = avatar.getPosition().getX() - position.getX();
+        double diffY = avatar.getPosition().getY() - position.getY();
+
+        int avatarState= avatar.getState();
+        if(diffX>0){
+            if(avatarState==0 || avatarState==2){
+                state=avatarState;
+            }else if(avatarState==1 || avatarState==3){
+                state=avatarState-1;
+            }
+        }else{
+            if(avatarState==0 || avatarState==2){
+                state=avatarState+1;
+            }else if(avatarState==1 || avatarState==3){
+                state=avatarState;
+            }
+        }
+
+        // Normalizar la dirección
+        double distance = Math.sqrt(diffX * diffX + diffY * diffY);
+        double directionX = diffX / distance;
+        double directionY = diffY / distance;
+
+        // Actualizar la posición del enemigo
+        double speed = 7; // Ajusta la velocidad de movimiento del enemigo si es necesario
+        position.setX(position.getX() + directionX * speed);
+        position.setY(position.getY() + directionY * speed);
+    }
+
+    public void chargeImages() {
         for (int i = 0; i <= 7; i++) {
             Image image = new Image(
-                    getClass().getResourceAsStream("/animations/enemies/enemy_scenario_" + scenario + "/iddle/" + i + ".png"));
+                    getClass().getResourceAsStream(
+                            "/animations/enemies/enemy_scenario_" + scenario + "/iddle/" + i + ".png"));
             idleImages.add(image);
         }
 
         for (int i = 0; i <= 11; i++) {
             Image image = new Image(
-                    getClass().getResourceAsStream("/animations/enemies/enemy_scenario_" + scenario + "/run/" + i + ".png"));
+                    getClass().getResourceAsStream(
+                            "/animations/enemies/enemy_scenario_" + scenario + "/run/" + i + ".png"));
             runImages.add(image);
         }
 
         for (int i = 0; i <= 11; i++) {
             Image image = new Image(
-                    getClass().getResourceAsStream("/animations/enemies/enemy_scenario_" + scenario +  "/attack/" + i + ".png"));
+                    getClass().getResourceAsStream(
+                            "/animations/enemies/enemy_scenario_" + scenario + "/attack/" + i + ".png"));
             attackImages.add(image);
         }
 
-        for (int i = 1; i <= 2; i++) {
+        for (int i = 0; i <= 1; i++) {
             Image image = new Image(
-                    getClass().getResourceAsStream("/animations/enemies/enemy_scenario_" + scenario +  "/hurt/" + i + ".png"));
+                    getClass().getResourceAsStream(
+                            "/animations/enemies/enemy_scenario_" + scenario + "/hurt/" + i + ".png"));
             hurtImages.add(image);
         }
 
         for (int i = 0; i <= 5; i++) {
             Image image = new Image(
-                    getClass().getResourceAsStream("/animations/enemies/enemy_scenario_" + scenario +  "/die/" + i + ".png"));
+                    getClass().getResourceAsStream(
+                            "/animations/enemies/enemy_scenario_" + scenario + "/die/" + i + ".png"));
             deadImages.add(image);
         }
     }
 
-    @Override
-    public void draw(GraphicsContext graphicsContext) {
-        chargeImages();
-        onMove();
+    public void paint() {
         if (state == 0) {
             graphicsContext.drawImage(idleImages.get(frame % 3), position.getX(), position.getY());
             frame++;
-        } else if(state == 1) {
-            //Left idle
-            graphicsContext.drawImage(idleImages.get((frame % 3)+4), position.getX(), position.getY());
+        } else if (state == 1) {
+            // Left idle
+            graphicsContext.drawImage(idleImages.get((frame % 3) + 4), position.getX(), position.getY());
             frame++;
         } else if (state == 2) {
             graphicsContext.drawImage(runImages.get(frame % 5), position.getX(), position.getY());
             frame++;
         } else if (state == 3) {
-            //left run
-            graphicsContext.drawImage(runImages.get((frame % 5)+6), position.getX(), position.getY());
+            // left run
+            graphicsContext.drawImage(runImages.get((frame % 5) + 6), position.getX(), position.getY());
             frame++;
-        }  else if (state == 4) {
+        } else if (state == 4) {
             graphicsContext.drawImage(attackImages.get(frame % 5), position.getX(), position.getY());
             frame++;
-        }else if (state == 5) {
-            //left attack
-            graphicsContext.drawImage(attackImages.get((frame % 5)+6), position.getX(), position.getY());
+        } else if (state == 5) {
+            // left attack
+            graphicsContext.drawImage(attackImages.get((frame % 5) + 6), position.getX(), position.getY());
             frame++;
         } else if (state == 6) {
-            graphicsContext.drawImage(hurtImages.get(frame % 1), position.getX(), position.getY());
-            frame++;
+            graphicsContext.drawImage(hurtImages.get(0), position.getX(), position.getY());
+
         } else if (state == 7) {
-            //left hurt
-            graphicsContext.drawImage(hurtImages.get((frame % 1)+2), position.getX(), position.getY());
+            // left hurt
+            graphicsContext.drawImage(hurtImages.get((frame % 1)), position.getX(), position.getY());
             frame++;
         } else if (state == 8) {
-            graphicsContext.drawImage(deadImages.get(frame % 5), position.getX(), position.getY());
+            graphicsContext.drawImage(deadImages.get(frame % 4), position.getX(), position.getY());
             frame++;
         }
-    }
-
-    @Override
-    public void run() {
-        while (true) {
-            try {
-                Thread.sleep(120);
-            } catch (InterruptedException e) {
-                throw new RuntimeException(e);
-            }
-        }
-    }
-
-    public void onKeyPressed(KeyEvent event) {
-        switch (event.getCode()) {
-            case W:
-                if(state!=2 && state!=3){
-                    if(state==0 ){
-                        state=2;
-                    }else{
-                        state=3;
-                    }
-                }else{
-                    state=state;
-                }
-                upPressed = true;
-                break;
-            case S:
-                if(state!=2 && state!=3){
-                    if(state==0 ){
-                        state=2;
-                    }else{
-                        state=3;
-                    }
-                }else{
-                    state=state;
-                }
-                downPressed = true;
-                break;
-            case D:
-                state = 2;
-                rightPressed = true;
-                break;
-            case A:
-                state = 3;
-                leftPressed = true;
-                break;
-        }
-    }
-
-    public void onKeyReleased(KeyEvent event) {
-        switch (event.getCode()) {
-            case W:
-                if(leftPressed || rightPressed || downPressed){
-                    state=state;
-                    upPressed = false;
-                    break;
-                }
-                if(state==2){
-                    state=0;
-                }else if(state==3){
-                    state=1;
-                }
-                upPressed = false;
-                break;
-            case S:
-                if(leftPressed || rightPressed || upPressed){
-                    state=state;
-                    downPressed = false;
-                    break;
-                }
-                if(state==2){
-                    state=0;
-                }else if(state==3){
-                    state=1;
-                }
-                downPressed = false;
-                break;
-            case D:
-                if(leftPressed || upPressed || downPressed){
-                    state=state;
-                    rightPressed = false;
-                    break;
-                }
-                state=0;
-                rightPressed = false;
-                break;
-            case A:
-                if(rightPressed || upPressed || downPressed){
-                    state=state;
-                    leftPressed = false;
-                    break;
-                }
-                state=1;
-                leftPressed = false;
-                break;
-        }
-    }
-
-    public void onMouseReleased(MouseEvent event) {
-        if(leftPressed || rightPressed){
-            state=state;
-        }
-        if(state==4 || state==5){
-            if(state==4){
-                state=0;
-            }else{
-                state=1;
-            }
-        }
-        isAttacking = false;
-    }
-
-    public void onMousePressed(MouseEvent event) {
-        if(state==0 || state==1){
-            if(state==0){
-                state=4;
-            }else{
-                state=5;
-            }
-        }else if(leftPressed || rightPressed){
-            state=state;
-        }
-        isAttacking = true;
     }
 
     public void onMove() {
@@ -380,8 +300,6 @@ public class Enemy extends Drawing implements Runnable {
     public void setHurtImages(ArrayList<Image> hurtImages) {
         this.hurtImages = hurtImages;
     }
-
-    
 
     /**
      * @return double return the posX
@@ -516,7 +434,6 @@ public class Enemy extends Drawing implements Runnable {
         this.isAttacking = isAttacking;
     }
 
-
     /**
      * @return int return the lives
      */
@@ -529,6 +446,34 @@ public class Enemy extends Drawing implements Runnable {
      */
     public void setLives(int lives) {
         this.lives = lives;
+    }
+
+    /**
+     * @return int return the scenario
+     */
+    public int getScenario() {
+        return scenario;
+    }
+
+    /**
+     * @param scenario the scenario to set
+     */
+    public void setScenario(int scenario) {
+        this.scenario = scenario;
+    }
+
+    /**
+     * @return boolean return the isAlive
+     */
+    public boolean isIsAlive() {
+        return isAlive;
+    }
+
+    /**
+     * @param isAlive the isAlive to set
+     */
+    public void setIsAlive(boolean isAlive) {
+        this.isAlive = isAlive;
     }
 
 }
