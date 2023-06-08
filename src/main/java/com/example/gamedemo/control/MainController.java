@@ -104,7 +104,7 @@ public class MainController implements Initializable, Runnable {
             update();
             repaint();
             graphicsContext.drawImage(new Image(
-                getClass().getResourceAsStream("/animations/weapons/" + 0 + ".png")),100,100);
+                    getClass().getResourceAsStream("/animations/weapons/" + 0 + ".png")), 100, 100);
             try {
                 double remainingTime = nextDrawTime - System.nanoTime();
                 remainingTime /= 1000000;

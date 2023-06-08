@@ -1,0 +1,67 @@
+/* Estilos para el Pane principal */
+#main-pane {
+    -fx-background-image: url('Srr.png');
+    -fx-background-repeat: no-repeat;
+    -fx-background-size: 100% auto;
+}
+
+/* Estilos para el botón "Play" */
+.play-button {
+    -fx-background-color: #4CAF50;
+    -fx-text-fill: white;
+    -fx-font-size: 16px;
+    -fx-font-weight: bold;
+    -fx-padding: 10px 20px;
+}
+
+/* Estilos para el botón "Exit" */
+.exit-button {
+    -fx-background-color: #f44336;
+    -fx-text-fill: white;
+    -fx-font-size: 16px;
+    -fx-font-weight: bold;
+    -fx-padding: 10px 20px;
+}
+
+/* Estilos para el botón "Play" cuando se coloca el mouse encima */
+.play-button:hover {
+    -fx-background-color: #45a049;
+}
+
+/* Estilos para el botón "Exit" cuando se coloca el mouse encima */
+.exit-button:hover {
+    -fx-background-color: #d32f2f;
+}
+
+/* Estilos para el ImageView dentro del botón "Play" */
+.play-button .graphic {
+    -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.3), 5, 0, 0, 1);
+}
+
+/* Estilos para el HBox */
+#hbox {
+    -fx-spacing: 100px;
+    -fx-alignment: BOTTOM_CENTER;
+}
+
+/* Estilos para el título del juego */
+.title {
+    -fx-font-family: "Arial";
+    -fx-font-size: 24px;
+}
+
+.dialog-pane .dialog-header .graphic-container {
+    -fx-padding: 0;
+}
+
+.dialog-pane .dialog-header .graphic-container .graphic {
+    -fx-background-color: transparent;
+    -fx-background-image: url("src/main/resources/animations/logos/Exit.png");
+    -fx-background-size: contain;
+    -fx-background-repeat: no-repeat;
+    -fx-background-position: center;
+    -fx-min-width: 16px;
+    /* ajusta el ancho deseado */
+    -fx-min-height: 16px;
+    /* ajusta el alto deseado */
+}

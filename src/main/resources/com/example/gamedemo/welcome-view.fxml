@@ -1,32 +1,28 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<?import javafx.scene.layout.Pane?>
-<?import javafx.scene.control.Button?>
 <?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.layout.AnchorPane?>
+<?import javafx.scene.layout.HBox?>
 
-<Pane xmlns="http://javafx.com/javafx"
-      xmlns:fx="http://javafx.com/fxml"
-      fx:controller="com.example.gamedemo.control.WelcomeController">
-
+<AnchorPane id="main-pane" stylesheets="@styles.css" xmlns="http://javafx.com/javafx/19"
+    xmlns:fx="http://javafx.com/fxml/1"
+    fx:controller="com.example.gamedemo.control.WelcomeController">
     <children>
-        <Button text="Play" onAction="#handlePlayButton">
+        <HBox id="hbox" alignment="CENTER" layoutX="-1.0" layoutY="-1.0" spacing="100.0"
+            AnchorPane.bottomAnchor="10.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0"
+            AnchorPane.topAnchor="10.0">
+            <children>
+                <Button onAction="#onPlayButton" styleClass="play-button" text="Play">
+                    <padding>
+                        <Insets bottom="10" left="20" right="20" top="10" />
+                    </padding>
+                </Button>
+                <Button onAction="#onExitButton" styleClass="exit-button" text="Exit" />
+            </children>
             <padding>
-                <Insets top="10" right="20" bottom="10" left="20" />
+                <Insets bottom="50.0" />
             </padding>
-        </Button>
-
-        <Button text="Instructions" onAction="#handleInstructionsButton">
-            <padding>
-                <Insets top="10" right="20" bottom="10" left="20" />
-            </padding>
-            <layoutY>
-                <Insets top="60" />
-            </layoutY>
-        </Button>
+        </HBox>
     </children>
-
-    <stylesheets>
-        <URL value="@styles.css" />
-    </stylesheets>
-
-</Pane>
+</AnchorPane>
