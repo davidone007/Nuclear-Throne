@@ -5,13 +5,11 @@ import javafx.application.Application;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Cursor;
 import javafx.scene.Scene;
-import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.layout.Pane;
 import javafx.stage.Screen;
 import javafx.stage.Stage;
 import javafx.scene.image.Image;
-import javafx.scene.image.ImageView;
-import javafx.scene.input.MouseEvent;
+
 
 import java.io.IOException;
 
@@ -30,18 +28,19 @@ public class MainApplication extends Application {
         Image logoImage = new Image(getClass().getResourceAsStream("/animations/logos/logo.png"));
         stage.getIcons().add(logoImage);
         stage.setScene(scene);
-        stage.setOnCloseRequest(windowEvent -> {
-            MainController controller = fxmlLoader.getController();
-            controller.setRunning(false);
-
-        });
+      
 
         stage.setWidth(screenWidth);
         stage.setHeight(screenHeight);
         // Oculta el puntero del mouse
-        scene.setCursor(Cursor.NONE);
 
         stage.show();
+
+          stage.setOnCloseRequest(windowEvent -> {
+            MainController controller = fxmlLoader.getController();
+            controller.setRunning(false);
+
+        });
 
     }
 

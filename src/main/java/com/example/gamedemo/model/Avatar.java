@@ -5,13 +5,12 @@ import javafx.scene.canvas.Canvas;
 import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.image.Image;
 import javafx.scene.input.KeyEvent;
-import javafx.scene.input.MouseButton;
 import javafx.scene.input.MouseEvent;
 
 import java.util.ArrayList;
 
 
-public class Avatar {
+public class Avatar extends Drawing implements Runnable {
 
     // Elementos graficos
     private Canvas canvas;
@@ -38,7 +37,7 @@ public class Avatar {
     private boolean leftPressed;
     private boolean rightPressed;
     private boolean isAttacking;
-    private int lives;
+    private int lifes;
 
     public Avatar(Canvas canvas) {
         this.weapon = 0;
@@ -51,7 +50,7 @@ public class Avatar {
         this.posX = 100;
         this.posY = 100;
 
-        this.lives = 3;
+        this.lifes = 3;
 
         idleImages = new ArrayList<>();
         runImages = new ArrayList<>();
@@ -102,8 +101,8 @@ public class Avatar {
             deadImages.add(image);
         }
     }
-
-    public void paint() {
+    @Override
+    public void draw(GraphicsContext graphicsContext) {
         chargeImages();
         onMove();
         if (state == 0) {
@@ -137,6 +136,17 @@ public class Avatar {
         } else if (state == 8) {
             graphicsContext.drawImage(deadImages.get(frame % 4), position.getX(), position.getY());
             frame++;
+        }
+    }
+
+    @Override
+    public void run() {
+        while (true) {
+            try {
+                Thread.sleep(120);
+            } catch (InterruptedException e) {
+                throw new RuntimeException(e);
+            }
         }
     }
 
@@ -522,15 +532,15 @@ public class Avatar {
     /**
      * @return int return the lives
      */
-    public int getLives() {
-        return lives;
+    public int getLifes() {
+        return lifes;
     }
 
     /**
-     * @param lives the lives to set
+     * @param lifes the lives to set
      */
-    public void setLives(int lives) {
-        this.lives = lives;
+    public void setLifes(int lifes) {
+        this.lifes = lifes;
     }
 
 }

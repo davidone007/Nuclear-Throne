@@ -9,7 +9,7 @@ import javafx.scene.input.MouseEvent;
 import java.util.ArrayList;
 
 
-public class Enemy {
+public class Enemy extends Drawing implements Runnable {
 
     // Elementos graficos
     private Canvas canvas;
@@ -19,7 +19,7 @@ public class Enemy {
     private ArrayList<Image> attackImages;
     private ArrayList<Image> deadImages;
     private ArrayList<Image> hurtImages;
-    private int weapon;
+    private int scenario;
 
     // referencias espaciales
     private double posX;
@@ -38,8 +38,8 @@ public class Enemy {
     private boolean isAttacking;
     private int lives;
 
-    public Enemy(Canvas canvas, Vector position) {
-        this.weapon = 0;
+    public Enemy(Canvas canvas, Vector position, int scenario) {
+        this.scenario= scenario;
         this.state = 0;
         this.canvas = canvas;
         this.graphicsContext = canvas.getGraphicsContext2D();
@@ -72,36 +72,37 @@ public class Enemy {
         clearImages();
         for (int i = 0; i <= 7; i++) {
             Image image = new Image(
-                    getClass().getResourceAsStream("/animations/enemies/weapon_" + weapon + "/iddle/" + i + ".png"));
+                    getClass().getResourceAsStream("/animations/enemies/enemy_scenario_" + scenario + "/iddle/" + i + ".png"));
             idleImages.add(image);
         }
 
         for (int i = 0; i <= 11; i++) {
             Image image = new Image(
-                    getClass().getResourceAsStream("/animations/hero/weapon_" + weapon + "/run/" + i + ".png"));
+                    getClass().getResourceAsStream("/animations/enemies/enemy_scenario_" + scenario + "/run/" + i + ".png"));
             runImages.add(image);
         }
 
         for (int i = 0; i <= 11; i++) {
             Image image = new Image(
-                    getClass().getResourceAsStream("/animations/hero/weapon_" + weapon + "/attack/" + i + ".png"));
+                    getClass().getResourceAsStream("/animations/enemies/enemy_scenario_" + scenario +  "/attack/" + i + ".png"));
             attackImages.add(image);
         }
 
         for (int i = 1; i <= 2; i++) {
             Image image = new Image(
-                    getClass().getResourceAsStream("/animations/hero/weapon_" + weapon + "/hurt/" + i + ".png"));
+                    getClass().getResourceAsStream("/animations/enemies/enemy_scenario_" + scenario +  "/hurt/" + i + ".png"));
             hurtImages.add(image);
         }
 
         for (int i = 0; i <= 5; i++) {
             Image image = new Image(
-                    getClass().getResourceAsStream("/animations/hero/weapon_" + weapon + "/dead/" + i + ".png"));
+                    getClass().getResourceAsStream("/animations/enemies/enemy_scenario_" + scenario +  "/die/" + i + ".png"));
             deadImages.add(image);
         }
     }
 
-    public void paint() {
+    @Override
+    public void draw(GraphicsContext graphicsContext) {
         chargeImages();
         onMove();
         if (state == 0) {
@@ -133,8 +134,19 @@ public class Enemy {
             graphicsContext.drawImage(hurtImages.get((frame % 1)+2), position.getX(), position.getY());
             frame++;
         } else if (state == 8) {
-            graphicsContext.drawImage(deadImages.get(frame % 4), position.getX(), position.getY());
+            graphicsContext.drawImage(deadImages.get(frame % 5), position.getX(), position.getY());
             frame++;
+        }
+    }
+
+    @Override
+    public void run() {
+        while (true) {
+            try {
+                Thread.sleep(120);
+            } catch (InterruptedException e) {
+                throw new RuntimeException(e);
+            }
         }
     }
 
@@ -369,19 +381,7 @@ public class Enemy {
         this.hurtImages = hurtImages;
     }
 
-    /**
-     * @return int return the weapon
-     */
-    public int getWeapon() {
-        return weapon;
-    }
-
-    /**
-     * @param weapon the weapon to set
-     */
-    public void setWeapon(int weapon) {
-        this.weapon = weapon;
-    }
+    
 
     /**
      * @return double return the posX

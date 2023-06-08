@@ -5,7 +5,7 @@ import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.image.Image;
 import javafx.scene.paint.Color;
 
-public class Bullet {
+public class Bullet extends Drawing implements Runnable {
 
     // Elementos graficos
     private Canvas canvas;
@@ -28,13 +28,26 @@ public class Bullet {
         this.size = 20;
         this.speed = 10;
         typeBullet = new Image(getClass().getResourceAsStream("/animations/bullets/" + weapon + ".png"));
+
+        
     }
 
-    public void paint() {
+    @Override
+    public void draw(GraphicsContext graphicsContext) {
         graphicsContext.drawImage(typeBullet, position.getX(), position.getY(), size, size);
         position.setX(position.getX() + direction.getX());
         position.setY(position.getY() + direction.getY());
+    }
 
+    @Override
+    public void run() {
+        while (true) {
+            try {
+                Thread.sleep(120);
+            } catch (InterruptedException e) {
+                throw new RuntimeException(e);
+            }
+        }
     }
 
     public double getPositionX() {
