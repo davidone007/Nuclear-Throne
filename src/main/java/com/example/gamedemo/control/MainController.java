@@ -2,8 +2,7 @@ package com.example.gamedemo.control;
 
 import com.example.gamedemo.MainApplication;
 import com.example.gamedemo.model.*;
-import com.example.gamedemo.screens.BaseScreen;
-import com.example.gamedemo.screens.Scenario_1;
+import com.example.gamedemo.screens.*;
 
 import javafx.application.Platform;
 import javafx.fxml.FXML;
@@ -86,6 +85,10 @@ public class MainController implements Initializable {
         this.animationFrame = 0;
 
         screens.add(new Scenario_1(canvas));
+        screens.add(new Scenario_2(canvas));
+        screens.add(new Scenario_3(canvas));
+        actualScreen = 3;// Cambioooooooooooo
+
         font = Font.loadFont(getClass().getResourceAsStream("/fonts/Super Mario Bros. 2.ttf"), 20);
         pointerImage = new Image(getClass().getResourceAsStream("/animations/pointer/pointer.png"));
         currentBullets = 0;
@@ -441,7 +444,7 @@ public class MainController implements Initializable {
         text.setFont(graphicsContext.getFont());
 
         graphicsContext.setFont(font);
-        graphicsContext.setFill(Color.WHITE);
+        graphicsContext.setFill(Color.BLACK); // Color De Fondo Transparente (Color.color(0, 0, 0, 0))
         graphicsContext.fillText(weaponInfo, infoX, infoY);
         double textWidth = text.getLayoutBounds().getWidth();
 
@@ -592,33 +595,34 @@ public class MainController implements Initializable {
 
     }
 
-
     public void paintShoot() {
 
         for (int i = 0; i < bullets.size(); i++) {
             bullets.get(i).paint();
 
-            /*for (Rectangle wall : screens.get(actualScreen - 1).getWalls()) {
-
-                double targetX = bullets.get(i).getPositionX(); // Coordenada X del objetivo
-                double targetY = bullets.get(i).getPositionY();  // Coordenada Y del objetivo
-
-                Bounds hitboxBounds = wall.getBoundsInParent();
-                double hitboxCenterX = hitboxBounds.getMinX() + hitboxBounds.getWidth() / 2;
-                double hitboxCenterY = hitboxBounds.getMinY() + hitboxBounds.getHeight() / 2;
-
-                double distance = Math.sqrt(
-                        Math.pow(hitboxCenterX - targetX, 2) +
-                                Math.pow(hitboxCenterY - targetY, 2));
-
-                if (distance <= 70) {
-                    bullets.remove(i);
-                    i--;
-                    break;
-                }
-                
-            }
-            /* */
+            /*
+             * for (Rectangle wall : screens.get(actualScreen - 1).getWalls()) {
+             * 
+             * double targetX = bullets.get(i).getPositionX(); // Coordenada X del objetivo
+             * double targetY = bullets.get(i).getPositionY(); // Coordenada Y del objetivo
+             * 
+             * Bounds hitboxBounds = wall.getBoundsInParent();
+             * double hitboxCenterX = hitboxBounds.getMinX() + hitboxBounds.getWidth() / 2;
+             * double hitboxCenterY = hitboxBounds.getMinY() + hitboxBounds.getHeight() / 2;
+             * 
+             * double distance = Math.sqrt(
+             * Math.pow(hitboxCenterX - targetX, 2) +
+             * Math.pow(hitboxCenterY - targetY, 2));
+             * 
+             * if (distance <= 70) {
+             * bullets.remove(i);
+             * i--;
+             * break;
+             * }
+             * 
+             * }
+             * /*
+             */
 
             if (bullets.get(i).getPositionX() > canvas.getWidth()) {
                 bullets.remove(i);
