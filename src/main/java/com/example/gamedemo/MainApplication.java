@@ -16,6 +16,7 @@ import javafx.scene.media.MediaPlayer;
 import javafx.scene.media.MediaView;
 import javafx.stage.Screen;
 import javafx.stage.Stage;
+import java.util.Set;
 
 import java.io.IOException;
 
@@ -68,7 +69,7 @@ public class MainApplication extends Application {
         primaryStage.setOnCloseRequest(windowEvent -> {
             WelcomeController controller = fxmlLoader.getController();
             mediaPlayer.stop();
-            Platform.exit();
+            stopAndCloseProgram();
         });
     }
 
@@ -90,6 +91,7 @@ public class MainApplication extends Application {
             primaryStage.setOnCloseRequest(windowEvent -> {
                 MainController controller = fxmlLoader.getController();
                 controller.setRunning(false);
+                stopAndCloseProgram();
             });
 
             primaryStage.setFullScreen(true); // Establecer pantalla completa después de cambiar la escena
@@ -135,6 +137,7 @@ public class MainApplication extends Application {
             primaryStage.setOnCloseRequest(windowEvent -> {
                 MainController controller = fxmlLoader.getController();
                 controller.setRunning(false);
+                stopAndCloseProgram();
             });
 
             // Oculta el puntero del mouse
@@ -167,6 +170,7 @@ public class MainApplication extends Application {
             primaryStage.setOnCloseRequest(windowEvent -> {
                 MainController controller = fxmlLoader.getController();
                 controller.setRunning(false);
+                stopAndCloseProgram();
             });
 
             primaryStage.setFullScreen(true); // Establecer pantalla completa después de cambiar la escena
@@ -211,6 +215,7 @@ public class MainApplication extends Application {
             primaryStage.setOnCloseRequest(windowEvent -> {
                 MainController controller = fxmlLoader.getController();
                 controller.setRunning(false);
+                stopAndCloseProgram();
             });
 
             primaryStage.setFullScreen(true); // Establecer pantalla completa después de cambiar la escena
@@ -235,6 +240,21 @@ public class MainApplication extends Application {
         } catch (IOException e) {
             e.printStackTrace();
         }
+    }
+
+    public void stopAndCloseProgram() {
+        // Obtén todos los hilos activos
+        Set<Thread> threadSet = Thread.getAllStackTraces().keySet();
+
+        // Detén todos los hilos, excepto el hilo principal
+        for (Thread thread : threadSet) {
+            if (thread != Thread.currentThread()) {
+                thread.interrupt();
+            }
+        }
+
+        // Cierra el programa
+        Platform.exit();
     }
 
     public static MainApplication getInstance() {

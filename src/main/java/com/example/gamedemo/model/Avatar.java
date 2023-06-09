@@ -5,14 +5,14 @@ import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.image.Image;
 import javafx.scene.input.KeyEvent;
 import javafx.scene.input.MouseEvent;
+import javafx.scene.paint.Color;
 import javafx.scene.shape.Rectangle;
 
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 
-
-public class Avatar implements Runnable{
+public class Avatar implements Runnable {
 
     // Elementos graficos
     private Canvas canvas;
@@ -31,6 +31,7 @@ public class Avatar implements Runnable{
     private double posY;
 
     private Vector position;
+    private Vector mapInicialPosicion;
     private Vector direction;
 
     // estado actual del personaje
@@ -49,11 +50,10 @@ public class Avatar implements Runnable{
         this.state = 0;
         this.canvas = canvas;
         this.graphicsContext = canvas.getGraphicsContext2D();
-        this.isAlive= true;
-        this.hitbox = new Rectangle(0, 0, 70, 120); 
-
-        this.position = new Vector(100, 100);
-
+        this.isAlive = true;
+        this.hitbox = new Rectangle(1300, 500, 70, 120);
+        this.position = new Vector(1300, 500);
+        this.mapInicialPosicion = new Vector(1300, 500);
         this.posX = 100;
         this.posY = 100;
         this.lives = 5;
@@ -73,12 +73,12 @@ public class Avatar implements Runnable{
             try {
                 Thread.sleep(0);
             } catch (InterruptedException e) {
-                throw new RuntimeException(e);
+                System.out.println("");
             }
         }
     }
 
-    public void clearImages(){
+    public void clearImages() {
         idleImages.clear();
         runImages.clear();
         attackImages.clear();
@@ -87,33 +87,33 @@ public class Avatar implements Runnable{
     }
 
     public void chargeImages() {
-    clearImages();
-    for (int i = 0; i <= 7; i++) {
-        String imagePath = "/animations/hero/weapon_" + weapon + "/iddle/" + i + ".png";
-        idleImages.add(getImageFromCache(imagePath));
-    }
+        clearImages();
+        for (int i = 0; i <= 7; i++) {
+            String imagePath = "/animations/hero/weapon_" + weapon + "/iddle/" + i + ".png";
+            idleImages.add(getImageFromCache(imagePath));
+        }
 
-    for (int i = 0; i <= 11; i++) {
-        String imagePath = "/animations/hero/weapon_" + weapon + "/run/" + i + ".png";
-        runImages.add(getImageFromCache(imagePath));
-    }
+        for (int i = 0; i <= 11; i++) {
+            String imagePath = "/animations/hero/weapon_" + weapon + "/run/" + i + ".png";
+            runImages.add(getImageFromCache(imagePath));
+        }
 
-    for (int i = 0; i <= 11; i++) {
-        String imagePath = "/animations/hero/weapon_" + weapon + "/attack/" + i + ".png";
-        attackImages.add(getImageFromCache(imagePath));
-    }
+        for (int i = 0; i <= 11; i++) {
+            String imagePath = "/animations/hero/weapon_" + weapon + "/attack/" + i + ".png";
+            attackImages.add(getImageFromCache(imagePath));
+        }
 
-    for (int i = 0; i <= 1; i++) {
-        String imagePath = "/animations/hero/weapon_" + weapon + "/hurt/" + i + ".png";
-        hurtImages.add(getImageFromCache(imagePath));
-    }
+        for (int i = 0; i <= 1; i++) {
+            String imagePath = "/animations/hero/weapon_" + weapon + "/hurt/" + i + ".png";
+            hurtImages.add(getImageFromCache(imagePath));
+        }
+        
 
-    for (int i = 0; i <= 5; i++) {
-        String imagePath = "/animations/hero/weapon_" + weapon + "/dead/" + i + ".png";
-        deadImages.add(getImageFromCache(imagePath));
+        for (int i = 0; i <= 5; i++) {
+            String imagePath = "/animations/hero/weapon_" + weapon + "/dead/" + i + ".png";
+            deadImages.add(getImageFromCache(imagePath));
+        }
     }
-}
-
 
     private Image getImageFromCache(String imagePath) {
         if (imageCache.containsKey(imagePath)) {
@@ -131,60 +131,61 @@ public class Avatar implements Runnable{
         if (state == 0) {
             graphicsContext.drawImage(idleImages.get(frame % 3), position.getX(), position.getY());
             frame++;
-        } else if(state == 1) {
-            //Left idle
-            graphicsContext.drawImage(idleImages.get((frame % 3)+4), position.getX(), position.getY());
-            frame++; 
+        } else if (state == 1) {
+            // Left idle
+            graphicsContext.drawImage(idleImages.get((frame % 3) + 4), position.getX(), position.getY());
+            frame++;
         } else if (state == 2) {
             graphicsContext.drawImage(runImages.get(frame % 5), position.getX(), position.getY());
             frame++;
         } else if (state == 3) {
-            //left run
-            graphicsContext.drawImage(runImages.get((frame % 5)+6), position.getX(), position.getY());
+            // left run
+            graphicsContext.drawImage(runImages.get((frame % 5) + 6), position.getX(), position.getY());
             frame++;
-        }  else if (state == 4) {
+        } else if (state == 4) {
             graphicsContext.drawImage(attackImages.get(frame % 5), position.getX(), position.getY());
             frame++;
-        }else if (state == 5) {
-            //left attack
-            graphicsContext.drawImage(attackImages.get((frame % 5)+6), position.getX(), position.getY());
+        } else if (state == 5) {
+            // left attack
+            graphicsContext.drawImage(attackImages.get((frame % 5) + 6), position.getX(), position.getY());
             frame++;
         } else if (state == 6) {
             graphicsContext.drawImage(hurtImages.get(0), position.getX(), position.getY());
-            
+
         } else if (state == 7) {
-            //left hurt
+            // left hurt
             graphicsContext.drawImage(hurtImages.get((frame % 1)), position.getX(), position.getY());
             frame++;
         } else if (state == 8) {
             graphicsContext.drawImage(deadImages.get(frame % 4), position.getX(), position.getY());
             frame++;
         }
+
     }
 
     public void onKeyPressed(KeyEvent event) {
         switch (event.getCode()) {
             case W:
-                if(state!=2 && state!=3){
-                    if(state==0 ){
-                        state=2;
-                    }else{
-                        state=3;
+                if (state != 2 && state != 3) {
+                    if (state == 0) {
+                        state = 2;
+                    } else {
+                        state = 3;
                     }
-                }else{
-                    state=state;
+                } else {
+                    state = state;
                 }
                 upPressed = true;
                 break;
             case S:
-                if(state!=2 && state!=3){
-                    if(state==0 ){
-                        state=2;
-                    }else{
-                        state=3;
+                if (state != 2 && state != 3) {
+                    if (state == 0) {
+                        state = 2;
+                    } else {
+                        state = 3;
                     }
-                }else{
-                    state=state;
+                } else {
+                    state = state;
                 }
                 downPressed = true;
                 break;
@@ -202,104 +203,105 @@ public class Avatar implements Runnable{
     public void onKeyReleased(KeyEvent event) {
         switch (event.getCode()) {
             case W:
-                if(leftPressed || rightPressed || downPressed){
-                    state=state;
+                if (leftPressed || rightPressed || downPressed) {
+                    state = state;
                     upPressed = false;
                     break;
                 }
-                if(state==2){
-                    state=0;
-                }else if(state==3){
-                    state=1;
+                if (state == 2) {
+                    state = 0;
+                } else if (state == 3) {
+                    state = 1;
                 }
                 upPressed = false;
                 break;
             case S:
-                if(leftPressed || rightPressed || upPressed){
-                    state=state;
+                if (leftPressed || rightPressed || upPressed) {
+                    state = state;
                     downPressed = false;
                     break;
                 }
-                if(state==2){
-                    state=0;
-                }else if(state==3){
-                    state=1;
+                if (state == 2) {
+                    state = 0;
+                } else if (state == 3) {
+                    state = 1;
                 }
                 downPressed = false;
                 break;
             case D:
-                if(leftPressed || upPressed || downPressed){
-                    if(leftPressed){
-                        state=3;
-                    }else{
-                        state=state;
+                if (leftPressed || upPressed || downPressed) {
+                    if (leftPressed) {
+                        state = 3;
+                    } else {
+                        state = state;
                     }
-                    
+
                     rightPressed = false;
                     break;
                 }
-                state=0;
+                state = 0;
                 rightPressed = false;
                 break;
             case A:
-                if(rightPressed || upPressed || downPressed){
-                    if(rightPressed){
-                        state=2;
-                    }else{
-                        state=state;
+                if (rightPressed || upPressed || downPressed) {
+                    if (rightPressed) {
+                        state = 2;
+                    } else {
+                        state = state;
                     }
                     leftPressed = false;
                     break;
                 }
-                state=1;
+                state = 1;
                 leftPressed = false;
                 break;
         }
     }
 
     public void onMouseReleased(MouseEvent event) {
-        if(leftPressed || rightPressed){
-            state=state;
+        if (leftPressed || rightPressed) {
+            state = state;
         }
-        if(state==4 || state==5){
-            if(state==4){
-                state=0;
-            }else{
-                state=1;
+        if (state == 4 || state == 5) {
+            if (state == 4) {
+                state = 0;
+            } else {
+                state = 1;
             }
         }
         isAttacking = false;
     }
 
     public void onMousePressed(MouseEvent event) {
-        if(state==0 || state==1){
-            if(state==0){
-                state=4;
-            }else{
-                state=5;
+        if (state == 0 || state == 1) {
+            if (state == 0) {
+                state = 4;
+            } else {
+                state = 5;
             }
-        }else if(leftPressed || rightPressed){
-            state=state;
+        } else if (leftPressed || rightPressed) {
+            state = state;
         }
         isAttacking = true;
     }
 
     public void onMove() {
         if (upPressed) {
-            hitbox.setY(position.getY() - 10);
+            hitbox.setY(position.getY() - 7);
             position.setY(position.getY() - 10);
         }
         if (downPressed) {
+            hitbox.setY(position.getY() + 7);
             position.setY(position.getY() + 10);
-            hitbox.setY(position.getY() + 10);
         }
         if (leftPressed) {
-            position.setX(position.getX() - 10);
             hitbox.setX(position.getX() - 10);
+            position.setX(position.getX() - 10);
         }
         if (rightPressed) {
+            hitbox.setX(position.getX() + 7);
             position.setX(position.getX() + 10);
-            hitbox.setX(position.getX() + 10);
+
         }
     }
 
@@ -553,7 +555,6 @@ public class Avatar implements Runnable{
         this.isAttacking = isAttacking;
     }
 
-
     /**
      * @return int return the lives
      */
@@ -567,7 +568,6 @@ public class Avatar implements Runnable{
     public void setLives(int lives) {
         this.lives = lives;
     }
-
 
     /**
      * @return Map<String, Image> return the imageCache
@@ -597,7 +597,6 @@ public class Avatar implements Runnable{
         this.isAlive = isAlive;
     }
 
-
     /**
      * @return Rectangle return the hitbox
      */
@@ -610,6 +609,21 @@ public class Avatar implements Runnable{
      */
     public void setHitbox(Rectangle hitbox) {
         this.hitbox = hitbox;
+    }
+
+
+    /**
+     * @return Vector return the mapInicialPosicion
+     */
+    public Vector getMapInicialPosicion() {
+        return mapInicialPosicion;
+    }
+
+    /**
+     * @param mapInicialPosicion the mapInicialPosicion to set
+     */
+    public void setMapInicialPosicion(Vector mapInicialPosicion) {
+        this.mapInicialPosicion = mapInicialPosicion;
     }
 
 }

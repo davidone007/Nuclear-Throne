@@ -25,6 +25,7 @@ import java.io.BufferedInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
+import java.nio.file.Watchable;
 import java.util.ArrayList;
 import java.util.Random;
 import java.util.ResourceBundle;
@@ -69,7 +70,6 @@ public class MainController implements Initializable {
     public void initialize(URL url, ResourceBundle resourceBundle) {
         random = new Random();
         isRunning = true;
-        actualScreen = 1;
         screens = new ArrayList<>(3);
         screenImages = new ArrayList<>(3);
         Screen screen = Screen.getPrimary();
@@ -87,8 +87,14 @@ public class MainController implements Initializable {
         screens.add(new Scenario_1(canvas));
         screens.add(new Scenario_2(canvas));
         screens.add(new Scenario_3(canvas));
-        actualScreen = 3; // Cambioooooooooooo
 
+        level(1);
+
+    }
+
+    public void level(int level) {
+        isRunning = false;
+        actualScreen = level;
         font = Font.loadFont(getClass().getResourceAsStream("/fonts/Super Mario Bros. 2.ttf"), 20);
         pointerImage = new Image(getClass().getResourceAsStream("/animations/pointer/pointer.png"));
         currentBullets = 0;
@@ -102,9 +108,9 @@ public class MainController implements Initializable {
         addEnemies();
         addBoxWeapon();
         addImagesWeapon();
-
         canvas.setFocusTraversable(true);
 
+        isRunning = true;
         new Thread(() -> {
             while (isRunning) {
                 Platform.runLater(() -> {
@@ -137,7 +143,8 @@ public class MainController implements Initializable {
             avatar.setIsAlive(false);
             killAllEnemies();
             backgroundMusic.stop();
-            Platform.exit();
+            MainApplication mainApp = MainApplication.getInstance();
+            mainApp.stopAndCloseProgram();
         });
 
     }
@@ -176,11 +183,51 @@ public class MainController implements Initializable {
     }
 
     public Vector getRandomPosition() {
-        double x = random.nextInt((int) canvas.getWidth() - 100) + 50; // Genera una coordenada X aleatoria
+        double x;
+        double y;
+        boolean isInWall = true;
 
-        double y = random.nextInt((int) canvas.getHeight() - 100) + 50; // Genera una coordenada Y aleatoria
+        do {
+            if (actualScreen == 3) {
+                x = random.nextInt((int) canvas.getWidth() / 2) + canvas.getWidth() / 2;
+                y = random.nextInt((int) canvas.getHeight() - 200) + 50;
+            } else {
+                x = random.nextInt((int) canvas.getWidth()) / 2;
+                y = random.nextInt((int) canvas.getHeight() - 200) + 50;
+            }
+
+            if (verifyPosWallCollision(x, y)) {
+                isInWall = true;
+            } else {
+                isInWall = false;
+            }
+
+            // Verificar si la posición generada se intersecta con alguna hitbox de pared
+            /*
+             * for (Rectangle wall : screens.get(actualScreen - 1).getWalls()) {
+             * if (wall.intersects(x, y, 1, 1)) {
+             * isInWall = true;
+             * break;
+             * }
+             * }
+             */
+        } while (isInWall);
 
         return new Vector(x, y);
+    }
+
+    public boolean allEnemiesKill() {
+
+        for (Enemy enemy : enemies) {
+
+            if (enemy.getIsAlive()) {
+                return false;
+            }
+
+        }
+
+        return true;
+
     }
 
     public void addImagesScreen() {
@@ -191,6 +238,7 @@ public class MainController implements Initializable {
     }
 
     public void addImagesWeapon() {
+
         for (int i = 0; i <= 2; i++) {
             weaponImage.add(new Image(
                     getClass().getResourceAsStream("/animations/weapons/" + i + ".png")));
@@ -221,13 +269,27 @@ public class MainController implements Initializable {
     }
 
     public void addBoxWeapon() {
-        for (int index = 0; index < 2; index++) {
-            BoxWeapon boxWeapon = new BoxWeapon(canvas, getRandomPosition(), index, 50);
-            boxWeapons.add(boxWeapon);
-            new Thread(boxWeapon).start();
+
+        BoxWeapon boxWeapon = null;
+        BoxWeapon boxWeapon2 = null;
+        if (actualScreen == 1) {
+            boxWeapon = new BoxWeapon(canvas, new Vector(canvas.getWidth() / 2, 300), 0, 50);
+            boxWeapon2 = new BoxWeapon(canvas, new Vector(canvas.getWidth() / 2, canvas.getHeight() - 200), 1, 50);
+
+        } else if (actualScreen == 2) {
+            boxWeapon = new BoxWeapon(canvas, new Vector(canvas.getWidth() / 2, 350), 0, 50);
+            boxWeapon2 = new BoxWeapon(canvas, new Vector(canvas.getWidth() / 2, canvas.getHeight() - 200), 1, 50);
+
+        } else {
+            boxWeapon = new BoxWeapon(canvas, new Vector(canvas.getWidth() / 2 - 200, 100), 0, 50);
+            boxWeapon2 = new BoxWeapon(canvas, new Vector(canvas.getWidth() / 2 + 240, canvas.getHeight() - 200), 1,
+                    50);
 
         }
-
+        boxWeapons.add(boxWeapon);
+        new Thread(boxWeapon).start();
+        boxWeapons.add(boxWeapon2);
+        new Thread(boxWeapon2).start();
     }
 
     public void onMouseMoved(MouseEvent event) {
@@ -265,7 +327,7 @@ public class MainController implements Initializable {
 
                 int pos = avatar.getState();
 
-                if (pos == 4) {
+                if (pos == 4 || pos == 2) {
                     bullets.add(
                             new Bullet(canvas,
                                     new Vector(avatar.getPosition().getX() + 120, avatar.getPosition().getY() + 50),
@@ -338,12 +400,13 @@ public class MainController implements Initializable {
         graphicsContext.drawImage(screenImages.get(actualScreen - 1), 0, 0, canvas.getWidth(), canvas.getHeight());
 
         verifyRunWallColision();
+
         // Insertar al avatar
         avatar.paint();
 
         // Seguir avatar
         for (Enemy enemy : enemies) {
-            enemy.follow();
+            enemy.follow(screens.get(actualScreen - 1).getWalls());
         }
 
         // Insertar cajas de armas en el screen
@@ -378,79 +441,228 @@ public class MainController implements Initializable {
     }
 
     public void verifyRunWallColision() {
-        for (Rectangle wall : screens.get(actualScreen - 1).getWalls()) {
-            graphicsContext.fillRect(wall.getX(), wall.getY(), wall.getWidth(), wall.getHeight());
+        if (!allEnemiesKill()) {
+            for (int i = 0; i < screens.get(actualScreen - 1).getWalls().size(); i++) {
+                Rectangle wall = screens.get(actualScreen - 1).getWalls().get(i);
 
-            if (avatar.getHitbox().intersects(wall.getBoundsInLocal())) {
-                double diffX = avatar.getPosition().getX() - wall.getX();
-                double diffY = avatar.getPosition().getY() - wall.getY();
+                if (avatar.getHitbox().intersects(wall.getBoundsInLocal())) {
+                    double diffX = avatar.getPosition().getX() - wall.getX();
+                    double diffY = avatar.getPosition().getY() - wall.getY();
 
-                double posX = avatar.getPosition().getX();
-                double posY = avatar.getPosition().getY();
-                if (diffX > 0) {
-                    if (avatar.isLeftPressed()) {
-                        avatar.setLeftPressed(false);
+                    double posX = avatar.getPosition().getX();
+                    double posY = avatar.getPosition().getY();
+
+                    boolean isDown = false;
+                    boolean isUp = false;
+                    boolean isLeft = false;
+                    boolean isRight = false;
+
+                    if ((posX - wall.getX()) <= (wall.getWidth() + 10)
+                            && (posX - wall.getX()) >= (wall.getWidth() - 10)) {
+                        isLeft = true;
                     }
-                } else {
-                    if (avatar.isRightPressed()) {
-                        avatar.setRightPressed(false);
+
+                    if ((posX - wall.getX()) <= 0
+                            && (posX - wall.getX()) >= -150) {
+                        isRight = true;
+                    }
+
+                    if ((posY - wall.getY()) <= -80
+                            && (posY - wall.getY()) >= -140) {
+                        isDown = true;
+                    }
+
+                    if ((posY - wall.getY()) <= (wall.getHeight() + 15)
+                            && (posY - wall.getY()) >= (wall.getHeight() - 15)) {
+                        isUp = true;
+                    }
+
+                    if (isDown || isUp) {
+                        if (diffY < 0) {
+                            if (avatar.isDownPressed()) {
+                                avatar.setDownPressed(false);
+                            }
+                        } else {
+                            if (avatar.isUpPressed()) {
+                                avatar.setUpPressed(false);
+                            }
+                        }
+                    } else {
+                        if (diffX > 0) {
+                            if (avatar.isLeftPressed()) {
+                                avatar.setLeftPressed(false);
+                            }
+                        } else {
+                            if (avatar.isRightPressed()) {
+                                avatar.setRightPressed(false);
+                            }
+                        }
+
+                    }
+
+                }
+            }
+        } else {
+            for (int i = 0; i < screens.get(actualScreen - 1).getWalls().size(); i++) {
+                Rectangle wall = screens.get(actualScreen - 1).getWalls().get(i);
+
+                if (wall.equals(screens.get(actualScreen - 1).getWalls()
+                        .get(screens.get(actualScreen - 1).getWalls().size() - 1))) {
+                    if (avatar.getHitbox().intersects(wall.getBoundsInLocal())) {
+                        if (actualScreen == 3) {
+                            backgroundMusic.stop();
+                            gameWin();
+                        } else if (actualScreen == 1) {
+                            backgroundMusic.stop();
+                            avatar.getHitbox().setX(canvas.getWidth() - 80);
+                            avatar.getPosition().setX(canvas.getWidth() - 80);
+                            avatar.getMapInicialPosicion().setX(canvas.getWidth() - 80);
+                            avatar.getHitbox().setY(canvas.getHeight() / 2);
+                            avatar.getPosition().setY(canvas.getHeight() / 2);
+                            avatar.getMapInicialPosicion().setY(canvas.getHeight() / 2);
+
+                            avatar.setWeapon(0);
+                            level(2);
+                        } else {
+                            backgroundMusic.stop();
+                            avatar.getHitbox().setX(130);
+                            avatar.getPosition().setX(130);
+                            avatar.getMapInicialPosicion().setX(130);
+                            avatar.getHitbox().setY(canvas.getHeight() - 100);
+                            avatar.getPosition().setY(canvas.getHeight() - 100);
+                            avatar.getMapInicialPosicion().setY(canvas.getHeight() - 100);
+                            avatar.setWeapon(0);
+                            level(3);
+                        }
                     }
                 }
 
-                if (diffY < 0) {
-                    if (avatar.isDownPressed()) {
-                        avatar.setDownPressed(false);
-                    }
-                } else {
-                    if (avatar.isUpPressed()) {
-                        avatar.setUpPressed(false);
-                    }
-                }
+                if (avatar.getHitbox().intersects(wall.getBoundsInLocal())) {
+                    double diffX = avatar.getPosition().getX() - wall.getX();
+                    double diffY = avatar.getPosition().getY() - wall.getY();
 
+                    double posX = avatar.getPosition().getX();
+                    double posY = avatar.getPosition().getY();
+
+                    boolean isDown = false;
+                    boolean isUp = false;
+                    boolean isLeft = false;
+                    boolean isRight = false;
+
+                    if ((posX - wall.getX()) <= (wall.getWidth() + 10)
+                            && (posX - wall.getX()) >= (wall.getWidth() - 10)) {
+                        isLeft = true;
+                    }
+
+                    if ((posX - wall.getX()) <= 0
+                            && (posX - wall.getX()) >= -150) {
+                        isRight = true;
+                    }
+
+                    if ((posY - wall.getY()) <= -80
+                            && (posY - wall.getY()) >= -140) {
+                        isDown = true;
+                    }
+
+                    if ((posY - wall.getY()) <= (wall.getHeight() + 15)
+                            && (posY - wall.getY()) >= (wall.getHeight() - 15)) {
+                        isUp = true;
+                    }
+
+                    if (isDown || isUp) {
+                        if (diffY < 0) {
+                            if (avatar.isDownPressed()) {
+                                avatar.setDownPressed(false);
+                            }
+                        } else {
+                            if (avatar.isUpPressed()) {
+                                avatar.setUpPressed(false);
+                            }
+                        }
+                    } else {
+                        if (diffX > 0) {
+                            if (avatar.isLeftPressed()) {
+                                avatar.setLeftPressed(false);
+                            }
+                        } else {
+                            if (avatar.isRightPressed()) {
+                                avatar.setRightPressed(false);
+                            }
+                        }
+
+                    }
+
+                }
             }
         }
+
     }
 
-    public void verifyNewWallColision() {
-        for (Rectangle wall : screens.get(actualScreen - 1).getWalls()) {
-            if (avatar.getHitbox().intersects(wall.getBoundsInLocal())) {
-                double posX = avatar.getHitbox().getX();
-                double posY = avatar.getHitbox().getY();
+    public void paintColisionEnemy() {
 
-                double diffX = posX - wall.getX();
-                double diffY = posY - wall.getY();
+        // Bucle para la colision con el enemigo
+        for (int i = 0; i < enemies.size(); i++) {
 
-                if (diffX > 0) {
-                    if (avatar.isLeftPressed()) {
-                        avatar.setLeftPressed(false);
+            Enemy actualEnemy = enemies.get(i);
+
+            if (avatar.getHitbox().intersects(actualEnemy.getHitbox().getBoundsInParent())) {
+
+                avatar.setLives(avatar.getLives() - 1);
+
+                int enemyState = actualEnemy.getState();
+                if (enemyState == 2) {
+                    actualEnemy.setState(4);
+                    actualEnemy.paint();
+
+                } else if (enemyState == 3) {
+                    actualEnemy.setState(5);
+                    for (int j = 0; j < actualEnemy.getAttackImages().size() - 5; j++) {
+                        graphicsContext.drawImage(actualEnemy.getAttackImages().get(j),
+                                actualEnemy.getPosition().getX(), actualEnemy.getPosition().getY());
                     }
-                    avatar.getHitbox().setX(posX + 100);
-                    avatar.getPosition().setX(posX + 100);
-                } else {
-                    if (avatar.isRightPressed()) {
-                        avatar.setRightPressed(false);
-                    }
-                    avatar.getHitbox().setX(posX - 100);
-                    avatar.getPosition().setX(posX - 100);
+
                 }
+                double inicialPositionX = avatar.getMapInicialPosicion().getX();
+                double inicialPositionY = avatar.getMapInicialPosicion().getY();
+                avatar.getHitbox().setX(inicialPositionX);
+                avatar.getPosition().setX(inicialPositionX);
+                avatar.getHitbox().setY(inicialPositionY);
+                avatar.getPosition().setY(inicialPositionY);
 
-                if (diffY < 0) {
-                    if (avatar.isDownPressed()) {
-                        avatar.setDownPressed(false);
-                    }
-                    avatar.getHitbox().setY(posY + 100);
-                    avatar.getPosition().setY(posY + 100);
+                if (avatar.getLives() == 0) {
+                    avatar.setState(8);
+                    avatar.paint();
+                    avatar.setIsAlive(false);
+                    actualEnemy.setState(0);
+                    actualEnemy.paint();
+
+                    gameOver();
+
+                    break;
                 } else {
-                    if (avatar.isUpPressed()) {
-                        avatar.setUpPressed(false);
+                    int state = avatar.getState();
+                    if (state == 2 || state == 0 || state == 4) {
+                        // Lo empuja a la izquierda
+                        avatar.setState(0);
+                        avatar.paint();
+                        avatar.setState(6);
+                        avatar.paint();
+
+                    } else {
+                        // Lo empuja a la derecha
+                        avatar.setState(1);
+                        avatar.paint();
+                        avatar.setState(7);
+                        avatar.paint();
                     }
-                    avatar.getHitbox().setY(posY - 100);
-                    avatar.getPosition().setY(posY - 100);
+                    playHurtPlayer();
+                    break;
                 }
 
             }
 
         }
+
     }
 
     private void paintPointer() {
@@ -465,7 +677,7 @@ public class MainController implements Initializable {
         text.setFont(graphicsContext.getFont());
 
         graphicsContext.setFont(font);
-        graphicsContext.setFill(Color.BLACK); // Color De Fondo Transparente (Color.color(0, 0, 0, 0))
+        graphicsContext.setFill(Color.WHITE); // Color De Fondo Transparente (Color.color(0, 0, 0, 0))
         graphicsContext.fillText(weaponInfo, infoX, infoY);
         double textWidth = text.getLayoutBounds().getWidth();
 
@@ -515,12 +727,6 @@ public class MainController implements Initializable {
                     avatar.setWeapon(2);
                     currentBullets = 30;
                     avatar.paint();
-                } else {
-                    boxWeapons.remove(i);
-                    i--;
-                    avatar.setWeapon(1);
-                    currentBullets = 30;
-                    avatar.paint();
                 }
 
                 break;
@@ -538,71 +744,6 @@ public class MainController implements Initializable {
         }
     }
 
-    public void paintColisionEnemy() {
-
-        // Bucle para la colision con el enemigo
-        for (int i = 0; i < enemies.size(); i++) {
-
-            Enemy actualEnemy = enemies.get(i);
-
-            if (avatar.getHitbox().intersects(actualEnemy.getHitbox().getBoundsInParent())) {
-
-                avatar.setLives(avatar.getLives() - 1);
-
-                int enemyState = actualEnemy.getState();
-                if (enemyState == 2) {
-                    actualEnemy.setState(4);
-                    actualEnemy.paint();
-
-                } else if (enemyState == 3) {
-                    actualEnemy.setState(5);
-                    for (int j = 0; j < actualEnemy.getAttackImages().size() - 5; j++) {
-                        graphicsContext.drawImage(actualEnemy.getAttackImages().get(j),
-                                actualEnemy.getPosition().getX(), actualEnemy.getPosition().getY());
-                    }
-
-                }
-
-                if (avatar.getLives() == 0) {
-                    avatar.setState(8);
-                    avatar.paint();
-                    avatar.setIsAlive(false);
-                    actualEnemy.setState(0);
-                    actualEnemy.paint();
-
-                    gameWin();
-
-                    break;
-                } else {
-                    int state = avatar.getState();
-                    if (state == 2 || state == 0) {
-                        avatar.getPosition().setX(avatar.getPosition().getX() - 150);
-                        avatar.getHitbox().setX(avatar.getPosition().getX() - 150);
-                        verifyNewWallColision();
-                        avatar.setState(0);
-                        avatar.paint();
-                        avatar.setState(6);
-                        avatar.paint();
-
-                    } else {
-                        avatar.getPosition().setX(avatar.getPosition().getX() + 150);
-                        avatar.getHitbox().setX(avatar.getPosition().getX() + 150);
-                        verifyNewWallColision();
-                        avatar.setState(1);
-                        avatar.paint();
-                        avatar.setState(7);
-                        avatar.paint();
-                    }
-                    playHurtPlayer();
-                    break;
-                }
-
-            }
-
-        }
-
-    }
-
     public void playHurtPlayer() {
         try {
             InputStream audioSrc = getClass().getResourceAsStream("/sounds/hurtPlayer.wav");
@@ -616,39 +757,31 @@ public class MainController implements Initializable {
 
     }
 
+    public boolean verifyPosWallCollision(double posX, double posY) {
+        for (Rectangle wall : screens.get(actualScreen - 1).getWalls()) {
+            Bounds hitboxBounds = wall.getBoundsInParent();
+            double rectLeft = hitboxBounds.getMinX();
+            double rectRight = hitboxBounds.getMaxX();
+            double rectTop = hitboxBounds.getMinY();
+            double rectBottom = hitboxBounds.getMaxY();
+
+            boolean collision = posX >= rectLeft && posX <= rectRight && posY >= rectTop && posY <= rectBottom;
+            if (collision) {
+                return true;
+            }
+        }
+        return false;
+    }
+
     public void paintShoot() {
 
         for (int i = 0; i < bullets.size(); i++) {
             bullets.get(i).paint();
-
-            /*
-             * for (Rectangle wall : screens.get(actualScreen - 1).getWalls()) {
-             * 
-             * double targetX = bullets.get(i).getPositionX(); // Coordenada X del objetivo
-             * double targetY = bullets.get(i).getPositionY(); // Coordenada Y del objetivo
-             * 
-             * Bounds hitboxBounds = wall.getBoundsInParent();
-             * double hitboxCenterX = hitboxBounds.getMinX() + hitboxBounds.getWidth() / 2;
-             * double hitboxCenterY = hitboxBounds.getMinY() + hitboxBounds.getHeight() / 2;
-             * 
-             * double distance = Math.sqrt(
-             * Math.pow(hitboxCenterX - targetX, 2) +
-             * Math.pow(hitboxCenterY - targetY, 2));
-             * 
-             * if (distance <= 70) {
-             * bullets.remove(i);
-             * i--;
-             * break;
-             * }
-             * 
-             * }
-             * /*
-             */
-
-            if (bullets.get(i).getPositionX() > canvas.getWidth()) {
+            if (verifyPosWallCollision(bullets.get(i).getPositionX(), bullets.get(i).getPositionY())) {
                 bullets.remove(i);
                 i--;
             }
+            ;
         }
 
         for (int i = 0; i < enemies.size(); i++) {
@@ -720,7 +853,7 @@ public class MainController implements Initializable {
     }
 
     public void initEvents() {
-        verifyRunWallColision();
+
         canvas.setOnKeyPressed(this::onKeyPressed);
 
         canvas.setOnKeyReleased(this::onKeyReleased);
@@ -974,6 +1107,48 @@ public class MainController implements Initializable {
      */
     public void setPointerImage(Image pointerImage) {
         this.pointerImage = pointerImage;
+    }
+
+    /**
+     * @return int return the animationFrame
+     */
+    public int getAnimationFrame() {
+        return animationFrame;
+    }
+
+    /**
+     * @param animationFrame the animationFrame to set
+     */
+    public void setAnimationFrame(int animationFrame) {
+        this.animationFrame = animationFrame;
+    }
+
+    /**
+     * @return Clip return the backgroundMusic
+     */
+    public Clip getBackgroundMusic() {
+        return backgroundMusic;
+    }
+
+    /**
+     * @param backgroundMusic the backgroundMusic to set
+     */
+    public void setBackgroundMusic(Clip backgroundMusic) {
+        this.backgroundMusic = backgroundMusic;
+    }
+
+    /**
+     * @return ArrayList<Image> return the screenImages
+     */
+    public ArrayList<Image> getScreenImages() {
+        return screenImages;
+    }
+
+    /**
+     * @param screenImages the screenImages to set
+     */
+    public void setScreenImages(ArrayList<Image> screenImages) {
+        this.screenImages = screenImages;
     }
 
 }

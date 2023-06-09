@@ -39,6 +39,11 @@ public class Enemy implements Runnable {
     private boolean isAlive;
     private Rectangle hitbox;
 
+    // Variables de disparo
+    private double shootRange; // Rango de disparo deseado
+    private long shootDelay; // Retraso de disparo deseado (en milisegundos)
+    private long lastShootTime; // Tiempo del último disparo
+
     public Enemy(Canvas canvas, Vector position, int scenario, Avatar avatar) {
         this.scenario = scenario;
         this.state = 0;
@@ -55,6 +60,11 @@ public class Enemy implements Runnable {
 
         this.lives = 3;
 
+        // Inicializar las variables de disparo
+        this.shootRange = 100; // Establecer el rango de disparo deseado
+        this.shootDelay = 500; // Establecer el retraso de disparo deseado (en milisegundos)
+        this.lastShootTime = 0;
+
         idleImages = new ArrayList<>();
         runImages = new ArrayList<>();
         attackImages = new ArrayList<>();
@@ -62,6 +72,25 @@ public class Enemy implements Runnable {
         deadImages = new ArrayList<>();
         chargeImages();
 
+    }
+
+    public boolean readyToShoot() {
+        Vector diff = new Vector(avatar.getPosition().getX() - position.getX(),
+                avatar.getPosition().getY() - position.getY());
+        double distance = Math.sqrt(diff.getX() * diff.getX() + diff.getY() * diff.getY());
+
+        if (distance <= shootRange) {
+            // El enemigo está dentro del rango de disparo
+            // Comprobar si ha pasado el tiempo suficiente desde el último disparo
+            long currentTime = System.currentTimeMillis();
+            if (currentTime - lastShootTime >= shootDelay) {
+                // Ha pasado suficiente tiempo, el enemigo está listo para disparar
+                lastShootTime = currentTime;
+                return true;
+            }
+        }
+
+        return false;
     }
 
     public void sleep() {
@@ -81,14 +110,12 @@ public class Enemy implements Runnable {
             try {
                 Thread.sleep(0);
             } catch (InterruptedException e) {
-                e.printStackTrace();
+                System.out.println("");
             }
         }
     }
 
-    public void follow() {
-
-        
+    public void follow(ArrayList<Rectangle> walls) {
         // Calcular la dirección hacia la cual moverse
         double diffX = avatar.getPosition().getX() - position.getX();
         double diffY = avatar.getPosition().getY() - position.getY();
@@ -98,29 +125,29 @@ public class Enemy implements Runnable {
             if (avatarState == 0 || avatarState == 2) {
                 if (avatar.getState() == 0) {
                     state = 2;
-                }else{
+                } else {
                     state = avatarState;
                 }
             } else if (avatarState == 1 || avatarState == 3) {
                 if (avatar.getState() == 1) {
                     state = 2;
-                }else{
+                } else {
                     state = avatarState - 1;
                 }
-                
+
             }
         } else {
             if (avatarState == 0 || avatarState == 2) {
                 if (avatar.getState() == 0) {
                     state = 3;
-                }else{
+                } else {
                     state = avatarState + 1;
                 }
-                
+
             } else if (avatarState == 1 || avatarState == 3) {
                 if (avatar.getState() == 1) {
                     state = 3;
-                }else{
+                } else {
                     state = avatarState;
                 }
             }
@@ -143,12 +170,50 @@ public class Enemy implements Runnable {
         double directionX = diffX / distance;
         double directionY = diffY / distance;
 
-        // Actualizar la posición del enemigo
-        double speed = 4; // Ajusta la velocidad de movimiento del enemigo si es necesario
-        position.setX(position.getX() + directionX * speed);
-        position.setY(position.getY() + directionY * speed);
-        hitbox.setX(position.getX() + directionX * speed);
-        hitbox.setY(position.getY() + directionY * speed);
+        boolean collidedWithWall = false;
+
+        for (Rectangle wall : walls) {
+            if (hitbox.getBoundsInParent().intersects(wall.getBoundsInParent())) {
+                collidedWithWall = true;
+
+                // Calcular la nueva dirección
+                double wallCenterX = wall.getX() + wall.getWidth() / 2;
+                double wallCenterY = wall.getY() + wall.getHeight() / 2;
+
+                double wallDiffX = wallCenterX - position.getX();
+                double wallDiffY = wallCenterY - position.getY();
+
+                // Calcular la distancia entre el enemigo y el centro del muro
+                double distanceToWallCenter = Math.sqrt(wallDiffX * wallDiffX + wallDiffY * wallDiffY);
+
+                // Calcular la nueva dirección evitando el muro
+                double newDirectionX = directionX - wallDiffX / distanceToWallCenter;
+                double newDirectionY = directionY - wallDiffY / distanceToWallCenter;
+
+                // Normalizar la nueva dirección
+                double newDistance = Math.sqrt(newDirectionX * newDirectionX + newDirectionY * newDirectionY);
+                if (newDistance != 0) { // Evitar la división por cero
+                    directionX = newDirectionX / newDistance;
+                    directionY = newDirectionY / newDistance;
+                }
+
+                // Actualizar la posición del enemigo
+                double speed = 5; // Ajusta la velocidad de movimiento del enemigo si es necesario
+                position.setX(position.getX() + directionX * speed);
+                position.setY(position.getY() + directionY * speed);
+                hitbox.setX(position.getX());
+                hitbox.setY(position.getY());
+            }
+        }
+
+        if (!collidedWithWall) {
+            // Actualizar la posición del enemigo si no hubo colisión con una pared
+            double speed = 5; // Ajusta la velocidad de movimiento del enemigo si es necesario
+            position.setX(position.getX() + directionX * speed);
+            position.setY(position.getY() + directionY * speed);
+            hitbox.setX(position.getX());
+            hitbox.setY(position.getY());
+        }
     }
 
     public void chargeImages() {
@@ -506,7 +571,7 @@ public class Enemy implements Runnable {
     /**
      * @return boolean return the isAlive
      */
-    public boolean isIsAlive() {
+    public boolean getIsAlive() {
         return isAlive;
     }
 

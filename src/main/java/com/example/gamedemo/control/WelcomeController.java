@@ -73,7 +73,8 @@ public class WelcomeController implements Initializable {
         Optional<ButtonType> result = alert.showAndWait();
         if (result.isPresent() && result.get() == buttonTypeYes) {
             backgroundMusic.stop();
-            Platform.exit();
+            MainApplication mainApp = MainApplication.getInstance();
+            mainApp.stopAndCloseProgram();
         }
     }
 

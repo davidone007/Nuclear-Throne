@@ -26,7 +26,10 @@ public class Bullet {
         this.direction = direction;
         this.size = 20;
         this.speed = 40;
-        typeBullet = new Image(getClass().getResourceAsStream("/animations/bullets/" + weapon + ".png"));
+       
+      typeBullet = new Image(getClass().getResourceAsStream("/animations/bullets/" + weapon + ".png"));
+ 
+  
     }
 
 

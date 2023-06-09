@@ -25,13 +25,15 @@ public class Scenario_2 extends BaseScreen {
 
         walls.add(new Rectangle(280, 0, canvas.getWidth(), 80)); // Pared superior
         walls.add(new Rectangle(0, canvas.getHeight() - 80, canvas.getWidth(), 80)); // Pared inferior
-        walls.add(new Rectangle(canvas.getWidth() - 80, 0, 80, 210)); // Pared superior derecha
-        walls.add(new Rectangle(canvas.getWidth() - 80, canvas.getHeight() - 280, 80, 280)); // Pared inferior derecha
+        walls.add(new Rectangle(canvas.getWidth() - 80, 0, 80, 240)); // Pared superior derecha
+        walls.add(new Rectangle(canvas.getWidth() - 80, canvas.getHeight() - 380, 80, 350)); // Pared inferior derecha
         walls.add(new Rectangle(0, 0, 80, canvas.getHeight())); // Pared izquierda
-        walls.add(new Rectangle(770, 0, 80, 210)); // Pared superior de la mitad
+        walls.add(new Rectangle(780, 0, 80, 240)); // Pared superior de la mitad
         walls.add(new Rectangle(310, canvas.getHeight() - 320, 320, 80)); // Primera Pared Horizontal
         walls.add(new Rectangle(550, 310, 80, 310)); // Primera Pared Vertical
         walls.add(new Rectangle(canvas.getWidth() - 520, canvas.getHeight() - 240, 80, 240)); // Pared Vertical
+        walls.add(new Rectangle(canvas.getWidth() - 10, 240, 10,320)); //Entrada
+        walls.add(new Rectangle(80,0,200,10)); //Salida
 
     }
 

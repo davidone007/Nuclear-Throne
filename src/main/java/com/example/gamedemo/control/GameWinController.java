@@ -30,7 +30,8 @@ public class GameWinController implements Initializable {
         // Configurar evento de cierre de la ventana
         MainApplication.getInstance().getPrimaryStage().setOnCloseRequest(event -> {
             backgroundMusic.stop();
-            Platform.exit();
+            MainApplication mainApp = MainApplication.getInstance();
+            mainApp.stopAndCloseProgram();
         });
     }
 
@@ -76,7 +77,8 @@ public class GameWinController implements Initializable {
         Optional<ButtonType> result = alert.showAndWait();
         if (result.isPresent() && result.get() == buttonTypeYes) {
             backgroundMusic.stop();
-            Platform.exit();
+            MainApplication mainApp = MainApplication.getInstance();
+            mainApp.stopAndCloseProgram();
 
         }
     }

@@ -34,17 +34,18 @@ public class BoxWeapon implements Runnable{
             try {
                 Thread.sleep(0);
             } catch (InterruptedException e) {
-                throw new RuntimeException(e);
+                System.out.println("");
             }
         }
     }
 
     public void paint() {
         graphicsContext.drawImage(typeBullet, position.getX(), position.getY(), size, size);
-        position.setX(position.getX());
-        position.setY(position.getY());
         hitbox.setX(position.getX());
         hitbox.setY(position.getY());
+        position.setX(position.getX());
+        position.setY(position.getY());
+        
 
     }
 
