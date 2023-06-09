@@ -4,8 +4,6 @@
 
 Davide Flamini Cazaran - davidone007
 
-Nicolas Cuellar Molina - Nicolas-CM
-
 Andres Cabezas Guerrero -  andrescabezas26
 
 ## Description
