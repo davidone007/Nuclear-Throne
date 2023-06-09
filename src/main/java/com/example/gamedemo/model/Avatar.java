@@ -7,6 +7,7 @@ import javafx.scene.image.Image;
 import javafx.scene.input.KeyEvent;
 import javafx.scene.input.MouseButton;
 import javafx.scene.input.MouseEvent;
+import javafx.scene.shape.Rectangle;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -43,6 +44,7 @@ public class Avatar implements Runnable{
     private boolean rightPressed;
     private boolean isAttacking;
     private int lives;
+    private Rectangle hitbox;
 
     public Avatar(Canvas canvas) {
         this.weapon = 0;
@@ -50,10 +52,11 @@ public class Avatar implements Runnable{
         this.canvas = canvas;
         this.graphicsContext = canvas.getGraphicsContext2D();
         this.isAlive= true;
+        this.hitbox = new Rectangle(0, 0, 100, 100); 
 
         this.position = new Vector(100, 100);
 
-        this.posX = 100;
+        this.posX = 900;
         this.posY = 100;
         this.lives = 5;
 
@@ -276,16 +279,20 @@ public class Avatar implements Runnable{
 
     public void onMove() {
         if (upPressed) {
+            hitbox.setY(position.getY() - 10);
             position.setY(position.getY() - 10);
         }
         if (downPressed) {
             position.setY(position.getY() + 10);
+            hitbox.setY(position.getY() + 10);
         }
         if (leftPressed) {
             position.setX(position.getX() - 10);
+            hitbox.setX(position.getX() - 10);
         }
         if (rightPressed) {
             position.setX(position.getX() + 10);
+            hitbox.setX(position.getX() + 10);
         }
     }
 
@@ -581,6 +588,21 @@ public class Avatar implements Runnable{
      */
     public void setIsAlive(boolean isAlive) {
         this.isAlive = isAlive;
+    }
+
+
+    /**
+     * @return Rectangle return the hitbox
+     */
+    public Rectangle getHitbox() {
+        return hitbox;
+    }
+
+    /**
+     * @param hitbox the hitbox to set
+     */
+    public void setHitbox(Rectangle hitbox) {
+        this.hitbox = hitbox;
     }
 
 }

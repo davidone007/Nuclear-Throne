@@ -2,6 +2,8 @@ package com.example.gamedemo.control;
 
 import com.example.gamedemo.model.*;
 import com.example.gamedemo.screens.BaseScreen;
+import com.example.gamedemo.screens.Scenario_1;
+
 import javafx.application.Platform;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
@@ -11,15 +13,27 @@ import javafx.scene.image.Image;
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyEvent;
 import javafx.scene.input.MouseEvent;
+
 import javafx.scene.paint.Color;
+import javafx.scene.shape.Rectangle;
 import javafx.scene.text.Font;
 import javafx.scene.text.Text;
 import javafx.stage.Screen;
 
+import java.io.BufferedInputStream;
+import java.io.File;
+import java.io.IOException;
+import java.io.InputStream;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Random;
 import java.util.ResourceBundle;
+
+import javax.sound.sampled.AudioInputStream;
+import javax.sound.sampled.AudioSystem;
+import javax.sound.sampled.Clip;
+import javax.sound.sampled.LineUnavailableException;
+import javax.sound.sampled.UnsupportedAudioFileException;
 
 public class MainController implements Initializable {
 
@@ -31,6 +45,8 @@ public class MainController implements Initializable {
     private int actualScreen;
 
     private int animationFrame;
+
+    private Clip backgroundMusic;
 
     private GraphicsContext graphicsContext;
     private Avatar avatar;
@@ -55,7 +71,7 @@ public class MainController implements Initializable {
         isRunning = true;
         actualScreen = 1;
         screens = new ArrayList<>(4);
-        screenImages= new ArrayList<>(3);
+        screenImages = new ArrayList<>(3);
         Screen screen = Screen.getPrimary();
         double screenWidth = screen.getBounds().getWidth();
         double screenHeight = screen.getBounds().getHeight();
@@ -68,6 +84,7 @@ public class MainController implements Initializable {
 
         this.animationFrame = 0;
 
+        screens.add(new Scenario_1(canvas));
         font = Font.loadFont(getClass().getResourceAsStream("/fonts/Super Mario Bros. 2.ttf"), 20);
         pointerImage = new Image(getClass().getResourceAsStream("/animations/pointer/pointer.png"));
         currentBullets = 0;
@@ -96,6 +113,23 @@ public class MainController implements Initializable {
         }).start();
 
         initEvents();
+
+        // Poner musica de fondo
+        playBackgroundMusic();
+
+    }
+
+    public void playBackgroundMusic() {
+        try {
+            InputStream audioSrc = getClass().getResourceAsStream("/sounds/scenario" + actualScreen + ".wav");
+            AudioInputStream audioInputStream = AudioSystem.getAudioInputStream(new BufferedInputStream(audioSrc));
+            backgroundMusic = AudioSystem.getClip();
+            backgroundMusic.open(audioInputStream);
+            backgroundMusic.loop(Clip.LOOP_CONTINUOUSLY);
+        } catch (UnsupportedAudioFileException | IOException | LineUnavailableException e) {
+            e.printStackTrace();
+        }
+
     }
 
     public Vector getRandomPosition() {
@@ -107,9 +141,9 @@ public class MainController implements Initializable {
     }
 
     public void addImagesScreen() {
-        for (int i = 1; i <= 4; i++) {
+        for (int i = 1; i <= 3; i++) {
             screenImages.add(new Image(
-                    getClass().getResourceAsStream("/scenarios/scenario_" + i + ".png")));
+                    getClass().getResourceAsStream("/scenarios/" + i + ".png")));
         }
     }
 
@@ -173,6 +207,7 @@ public class MainController implements Initializable {
     public void onMousePressed(MouseEvent event) {
         if (avatar.getWeapon() != 0) {
             if (currentBullets > 0) {
+
                 int weapon = avatar.getWeapon();
                 double diffX = event.getX() - avatar.getPosition().getX();
                 double diffY = event.getY() - avatar.getPosition().getY();
@@ -197,9 +232,25 @@ public class MainController implements Initializable {
                                     diff, weapon));
                 }
 
+                // Disparo jugador
+                playSoundShoot();
+
                 currentBullets--;
             }
         }
+    }
+
+    public void playSoundShoot() {
+        try {
+            InputStream audioSrc = getClass().getResourceAsStream("/sounds/shootPlayer.wav");
+            AudioInputStream audioInputStream = AudioSystem.getAudioInputStream(new BufferedInputStream(audioSrc));
+            Clip disparoSound = AudioSystem.getClip();
+            disparoSound.open(audioInputStream);
+            disparoSound.start();
+        } catch (UnsupportedAudioFileException | IOException | LineUnavailableException e) {
+            e.printStackTrace();
+        }
+
     }
 
     public void onMouseReleased(MouseEvent event) {
@@ -214,18 +265,32 @@ public class MainController implements Initializable {
             int bulletsToAdd = 30 - currentBullets;
             if (bulletsToAdd > 0) {
                 currentBullets += bulletsToAdd;
+
                 // Limitar la cantidad de balas al máximo (por ejemplo, 30)
                 if (currentBullets > 30) {
                     currentBullets = 30;
                 }
+                playSoundReload();
             }
+        }
+    }
+
+    public void playSoundReload() {
+        try {
+            InputStream audioSrc = getClass().getResourceAsStream("/sounds/reloadWeapon.wav");
+            AudioInputStream audioInputStream = AudioSystem.getAudioInputStream(new BufferedInputStream(audioSrc));
+            Clip disparoSound = AudioSystem.getClip();
+            disparoSound.open(audioInputStream);
+            disparoSound.start();
+        } catch (UnsupportedAudioFileException | IOException | LineUnavailableException e) {
+            e.printStackTrace();
         }
     }
 
     public void paint() {
 
         // Acomodar el contexto grafico (Screen)
-        graphicsContext.drawImage( screenImages.get(0), 0,0,canvas.getWidth(),canvas.getHeight());
+        graphicsContext.drawImage(screenImages.get(actualScreen - 1), 0, 0, canvas.getWidth(), canvas.getHeight());
 
         // Insertar al avatar
         avatar.paint();
@@ -355,11 +420,7 @@ public class MainController implements Initializable {
 
             Enemy actualEnemy = enemies.get(i);
 
-            double distanceColision = Math.sqrt(
-                    Math.pow(avatar.getPosition().getX() - actualEnemy.getPosition().getX(), 2) +
-                            Math.pow(avatar.getPosition().getY() - actualEnemy.getPosition().getY(), 2));
-
-            if (distanceColision <= 80) {
+            if (avatar.getHitbox().intersects(actualEnemy.getHitbox().getBoundsInParent())) {
 
                 avatar.setLives(avatar.getLives() - 1);
                 if (avatar.getLives() == 1) {
@@ -382,11 +443,25 @@ public class MainController implements Initializable {
                         avatar.setState(7);
                         avatar.paint();
                     }
+                    playHurtPlayer();
                     break;
                 }
 
             }
 
+        }
+
+    }
+
+    public void playHurtPlayer() {
+        try {
+            InputStream audioSrc = getClass().getResourceAsStream("/sounds/hurtPlayer.wav");
+            AudioInputStream audioInputStream = AudioSystem.getAudioInputStream(new BufferedInputStream(audioSrc));
+            Clip disparoSound = AudioSystem.getClip();
+            disparoSound.open(audioInputStream);
+            disparoSound.start();
+        } catch (UnsupportedAudioFileException | IOException | LineUnavailableException e) {
+            e.printStackTrace();
         }
 
     }
@@ -417,11 +492,19 @@ public class MainController implements Initializable {
                 if (distance <= 80) {
                     bullets.remove(j);
                     enemies.get(i).setLives(actualEnemyLives - 1);
+                    int enemyState = enemies.get(i).getState();
+                    if (enemyState == 3) {
+                        enemies.get(i).setState(7);
+                    } else if (enemyState == 2) {
+                        enemies.get(i).setState(6);
+                    }
+                    playSoundHurtEnemy();
                     if (actualEnemyLives == 1) {
                         enemies.get(i).setState(8);
                         enemies.get(i).paint();
                         enemies.get(i).setIsAlive(false);
                         enemies.remove(i);
+
                         i--;
                         return;
                     }
@@ -431,8 +514,26 @@ public class MainController implements Initializable {
         }
     }
 
+    public void playSoundHurtEnemy() {
+        try {
+            InputStream audioSrc = getClass().getResourceAsStream("/sounds/hurtEnemy.wav");
+            AudioInputStream audioInputStream = AudioSystem.getAudioInputStream(new BufferedInputStream(audioSrc));
+            Clip disparoSound = AudioSystem.getClip();
+            disparoSound.open(audioInputStream);
+            disparoSound.start();
+        } catch (UnsupportedAudioFileException | IOException | LineUnavailableException e) {
+            e.printStackTrace();
+        }
+
+    }
+
     public void setRunning(boolean running) {
         isRunning = running;
+
+        // Detener la música de fondo
+        if (!isRunning) {
+            backgroundMusic.stop();
+        }
     }
 
     public void initEvents() {

@@ -5,6 +5,7 @@ import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.image.Image;
 import javafx.scene.input.KeyEvent;
 import javafx.scene.input.MouseEvent;
+import javafx.scene.shape.Rectangle;
 
 import java.util.ArrayList;
 
@@ -38,6 +39,7 @@ public class Enemy implements Runnable {
     private boolean isAttacking;
     private int lives;
     private boolean isAlive;
+    private Rectangle hitbox;
 
     public Enemy(Canvas canvas, Vector position, int scenario, Avatar avatar) {
         this.scenario = scenario;
@@ -45,6 +47,7 @@ public class Enemy implements Runnable {
         this.canvas = canvas;
         this.graphicsContext = canvas.getGraphicsContext2D();
         this.avatar = avatar;
+        this.hitbox = new Rectangle(posX, posY, 140, 100);
 
         this.position = position;
 
@@ -109,6 +112,8 @@ public class Enemy implements Runnable {
         double speed = 7; // Ajusta la velocidad de movimiento del enemigo si es necesario
         position.setX(position.getX() + directionX * speed);
         position.setY(position.getY() + directionY * speed);
+        hitbox.setX(position.getX() + directionX * speed);
+        hitbox.setY(position.getY() + directionY * speed);
     }
 
     public void chargeImages() {
@@ -474,6 +479,35 @@ public class Enemy implements Runnable {
      */
     public void setIsAlive(boolean isAlive) {
         this.isAlive = isAlive;
+    }
+
+
+    /**
+     * @return Avatar return the avatar
+     */
+    public Avatar getAvatar() {
+        return avatar;
+    }
+
+    /**
+     * @param avatar the avatar to set
+     */
+    public void setAvatar(Avatar avatar) {
+        this.avatar = avatar;
+    }
+
+    /**
+     * @return Rectangle return the hitbox
+     */
+    public Rectangle getHitbox() {
+        return hitbox;
+    }
+
+    /**
+     * @param hitbox the hitbox to set
+     */
+    public void setHitbox(Rectangle hitbox) {
+        this.hitbox = hitbox;
     }
 
 }
