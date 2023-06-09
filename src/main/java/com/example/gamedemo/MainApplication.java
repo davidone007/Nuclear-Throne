@@ -72,134 +72,201 @@ public class MainApplication extends Application {
         });
     }
 
-    public void changeSceneTryAgain() throws IOException {
+    public void changeSceneTryPlayAgain() throws IOException {
         try {
-        FXMLLoader fxmlLoader = new FXMLLoader(MainApplication.class.getResource("welcome-view.fxml"));
-        Pane root = fxmlLoader.load();
-        Screen screen = Screen.getPrimary();
-        double screenWidth = screen.getBounds().getWidth();
-        double screenHeight = screen.getBounds().getHeight();
-        Scene scene = new Scene(root, screenWidth, screenHeight);
-        primaryStage.setTitle("Nuclear-Throne");
-        Image logoImage = new Image(getClass().getResourceAsStream("/animations/logos/logo.png"));
-        primaryStage.getIcons().add(logoImage);
-        primaryStage.setScene(scene);
+            FXMLLoader fxmlLoader = new FXMLLoader(MainApplication.class.getResource("welcome-view.fxml"));
+            Pane root = fxmlLoader.load();
+            Screen screen = Screen.getPrimary();
+            double screenWidth = screen.getBounds().getWidth();
+            double screenHeight = screen.getBounds().getHeight();
+            Scene scene = new Scene(root, screenWidth, screenHeight);
+            primaryStage.setTitle("Nuclear-Throne");
+            Image logoImage = new Image(getClass().getResourceAsStream("/animations/logos/logo.png"));
+            primaryStage.getIcons().add(logoImage);
+            primaryStage.setScene(scene);
 
-        primaryStage.setWidth(screenWidth);
-        primaryStage.setHeight(screenHeight);
-        primaryStage.setOnCloseRequest(windowEvent -> {
-            MainController controller = fxmlLoader.getController();
-            controller.setRunning(false);
-        });
+            primaryStage.setWidth(screenWidth);
+            primaryStage.setHeight(screenHeight);
+            primaryStage.setOnCloseRequest(windowEvent -> {
+                MainController controller = fxmlLoader.getController();
+                controller.setRunning(false);
+            });
 
+            primaryStage.setFullScreen(true); // Establecer pantalla completa después de cambiar la escena
 
+            // Agregar video de fondo
+            String videoFile = getClass().getResource("/videos/initGame.mp4").toExternalForm();
+            Media media = new Media(videoFile);
+            mediaPlayer = new MediaPlayer(media);
+            mediaPlayer.setCycleCount(MediaPlayer.INDEFINITE);
 
-        primaryStage.setFullScreen(true); // Establecer pantalla completa después de cambiar la escena
+            // Crear MediaView y establecer el MediaPlayer
+            MediaView mediaView = new MediaView(mediaPlayer);
+            mediaView.setFitWidth(screenWidth);
+            mediaView.setFitHeight(screenHeight);
 
-         // Agregar video de fondo
-        String videoFile = getClass().getResource("/videos/initGame.mp4").toExternalForm();
-        Media media = new Media(videoFile);
-        mediaPlayer = new MediaPlayer(media);
-        mediaPlayer.setCycleCount(MediaPlayer.INDEFINITE);
+            StackPane mediaContainer = (StackPane) fxmlLoader.getNamespace().get("mediaContainer");
+            mediaContainer.getChildren().add(mediaView);
 
-        // Crear MediaView y establecer el MediaPlayer
-        MediaView mediaView = new MediaView(mediaPlayer);
-        mediaView.setFitWidth(screenWidth);
-        mediaView.setFitHeight(screenHeight);
+            mediaPlayer.play();
 
-        StackPane mediaContainer = (StackPane) fxmlLoader.getNamespace().get("mediaContainer");
-        mediaContainer.getChildren().add(mediaView);
+            primaryStage.show();
 
-        mediaPlayer.play();
-
-        primaryStage.show();
-
-    } catch (IOException e) {
-        e.printStackTrace();
-    }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 
     public void changeScene() {
-    try {
-        FXMLLoader fxmlLoader = new FXMLLoader(MainApplication.class.getResource("game-view.fxml"));
-        Pane root = fxmlLoader.load();
-        Screen screen = Screen.getPrimary();
-        double screenWidth = screen.getBounds().getWidth();
-        double screenHeight = screen.getBounds().getHeight();
-        Scene scene = new Scene(root, screenWidth, screenHeight);
-        primaryStage.setTitle("Nuclear-Throne");
-        Image logoImage = new Image(getClass().getResourceAsStream("/animations/logos/logo.png"));
-        primaryStage.getIcons().add(logoImage);
-        primaryStage.setScene(scene);
+        try {
+            FXMLLoader fxmlLoader = new FXMLLoader(MainApplication.class.getResource("game-view.fxml"));
+            Pane root = fxmlLoader.load();
+            Screen screen = Screen.getPrimary();
+            double screenWidth = screen.getBounds().getWidth();
+            double screenHeight = screen.getBounds().getHeight();
+            Scene scene = new Scene(root, screenWidth, screenHeight);
+            primaryStage.setTitle("Nuclear-Throne");
+            Image logoImage = new Image(getClass().getResourceAsStream("/animations/logos/logo.png"));
+            primaryStage.getIcons().add(logoImage);
+            primaryStage.setScene(scene);
 
-        primaryStage.setWidth(screenWidth);
-        primaryStage.setHeight(screenHeight);
-        primaryStage.setOnCloseRequest(windowEvent -> {
-            MainController controller = fxmlLoader.getController();
-            controller.setRunning(false);
-        });
+            primaryStage.setWidth(screenWidth);
+            primaryStage.setHeight(screenHeight);
+            primaryStage.setOnCloseRequest(windowEvent -> {
+                MainController controller = fxmlLoader.getController();
+                controller.setRunning(false);
+            });
 
-        // Oculta el puntero del mouse
-        scene.setCursor(Cursor.NONE);
+            // Oculta el puntero del mouse
+            scene.setCursor(Cursor.NONE);
 
-        primaryStage.setFullScreen(true); // Establecer pantalla completa después de cambiar la escena
+            primaryStage.setFullScreen(true); // Establecer pantalla completa después de cambiar la escena
 
-        primaryStage.show();
-        
-    } catch (IOException e) {
-        e.printStackTrace();
+            primaryStage.show();
+
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
-}
 
- public void changeSceneGameOver() {
-    try {
-        FXMLLoader fxmlLoader = new FXMLLoader(MainApplication.class.getResource("gameOver-view.fxml"));
-        Pane root = fxmlLoader.load();
-        Screen screen = Screen.getPrimary();
-        double screenWidth = screen.getBounds().getWidth();
-        double screenHeight = screen.getBounds().getHeight();
-        Scene scene = new Scene(root, screenWidth, screenHeight);
-        primaryStage.setTitle("Nuclear-Throne");
-        Image logoImage = new Image(getClass().getResourceAsStream("/animations/logos/logo.png"));
-        primaryStage.getIcons().add(logoImage);
-        primaryStage.setScene(scene);
+    public void changeSceneGameOver() {
+        try {
+            FXMLLoader fxmlLoader = new FXMLLoader(MainApplication.class.getResource("gameOver-view.fxml"));
+            Pane root = fxmlLoader.load();
+            Screen screen = Screen.getPrimary();
+            double screenWidth = screen.getBounds().getWidth();
+            double screenHeight = screen.getBounds().getHeight();
+            Scene scene = new Scene(root, screenWidth, screenHeight);
+            primaryStage.setTitle("Nuclear-Throne");
+            Image logoImage = new Image(getClass().getResourceAsStream("/animations/logos/logo.png"));
+            primaryStage.getIcons().add(logoImage);
+            primaryStage.setScene(scene);
 
-        primaryStage.setWidth(screenWidth);
-        primaryStage.setHeight(screenHeight);
-        primaryStage.setOnCloseRequest(windowEvent -> {
-            MainController controller = fxmlLoader.getController();
-            controller.setRunning(false);
-        });
+            primaryStage.setWidth(screenWidth);
+            primaryStage.setHeight(screenHeight);
+            primaryStage.setOnCloseRequest(windowEvent -> {
+                MainController controller = fxmlLoader.getController();
+                controller.setRunning(false);
+            });
 
+            primaryStage.setFullScreen(true); // Establecer pantalla completa después de cambiar la escena
 
+            // Agregar video de fondo
+            String videoFile = getClass().getResource("/videos/gameOver.mp4").toExternalForm();
+            Media media = new Media(videoFile);
+            mediaPlayer = new MediaPlayer(media);
+            mediaPlayer.setCycleCount(MediaPlayer.INDEFINITE);
 
-        primaryStage.setFullScreen(true); // Establecer pantalla completa después de cambiar la escena
+            // Crear MediaView y establecer el MediaPlayer
+            MediaView mediaView = new MediaView(mediaPlayer);
+            mediaView.setFitWidth(screenWidth);
+            mediaView.setFitHeight(screenHeight);
 
-        // Agregar video de fondo
-        String videoFile = getClass().getResource("/videos/gameOver.mp4").toExternalForm();
-        Media media = new Media(videoFile);
-        mediaPlayer = new MediaPlayer(media);
-        mediaPlayer.setCycleCount(MediaPlayer.INDEFINITE);
+            StackPane mediaContainer = (StackPane) fxmlLoader.getNamespace().get("mediaContainer");
+            mediaContainer.getChildren().add(mediaView);
 
-        // Crear MediaView y establecer el MediaPlayer
-        MediaView mediaView = new MediaView(mediaPlayer);
-        mediaView.setFitWidth(screenWidth);
-        mediaView.setFitHeight(screenHeight);
+            mediaPlayer.play();
 
-        StackPane mediaContainer = (StackPane) fxmlLoader.getNamespace().get("mediaContainer");
-        mediaContainer.getChildren().add(mediaView);
-
-        mediaPlayer.play();
-
-        primaryStage.show();
-    } catch (IOException e) {
-        e.printStackTrace();
+            primaryStage.show();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
-}
 
+    public void changeSceneGameWin() {
+        try {
+            FXMLLoader fxmlLoader = new FXMLLoader(MainApplication.class.getResource("gameWin-view.fxml"));
+            Pane root = fxmlLoader.load();
+            Screen screen = Screen.getPrimary();
+            double screenWidth = screen.getBounds().getWidth();
+            double screenHeight = screen.getBounds().getHeight();
+            Scene scene = new Scene(root, screenWidth, screenHeight);
+            primaryStage.setTitle("Nuclear-Throne");
+            Image logoImage = new Image(getClass().getResourceAsStream("/animations/logos/logo.png"));
+            primaryStage.getIcons().add(logoImage);
+            primaryStage.setScene(scene);
 
+            primaryStage.setWidth(screenWidth);
+            primaryStage.setHeight(screenHeight);
+            primaryStage.setOnCloseRequest(windowEvent -> {
+                MainController controller = fxmlLoader.getController();
+                controller.setRunning(false);
+            });
+
+            primaryStage.setFullScreen(true); // Establecer pantalla completa después de cambiar la escena
+
+            // Agregar video de fondo
+            String videoFile = getClass().getResource("/videos/winScreen.mp4").toExternalForm();
+            Media media = new Media(videoFile);
+            mediaPlayer = new MediaPlayer(media);
+            mediaPlayer.setCycleCount(MediaPlayer.INDEFINITE);
+
+            // Crear MediaView y establecer el MediaPlayer
+            MediaView mediaView = new MediaView(mediaPlayer);
+            mediaView.setFitWidth(screenWidth);
+            mediaView.setFitHeight(screenHeight);
+
+            StackPane mediaContainer = (StackPane) fxmlLoader.getNamespace().get("mediaContainer");
+            mediaContainer.getChildren().add(mediaView);
+
+            mediaPlayer.play();
+
+            primaryStage.show();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
 
     public static MainApplication getInstance() {
         return instance;
     }
+
+    /**
+     * @return Stage return the primaryStage
+     */
+    public Stage getPrimaryStage() {
+        return primaryStage;
+    }
+
+    /**
+     * @param primaryStage the primaryStage to set
+     */
+    public void setPrimaryStage(Stage primaryStage) {
+        this.primaryStage = primaryStage;
+    }
+
+    /**
+     * @return MediaPlayer return the mediaPlayer
+     */
+    public MediaPlayer getMediaPlayer() {
+        return mediaPlayer;
+    }
+
+    /**
+     * @param mediaPlayer the mediaPlayer to set
+     */
+    public void setMediaPlayer(MediaPlayer mediaPlayer) {
+        this.mediaPlayer = mediaPlayer;
+    }
+
 }

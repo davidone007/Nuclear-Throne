@@ -21,7 +21,7 @@ import javafx.scene.control.ButtonType;
 import javafx.scene.control.DialogPane;
 import javafx.scene.control.Alert.AlertType;
 
-public class GameOverController implements Initializable {
+public class GameWinController implements Initializable {
 
     private Clip backgroundMusic;
 
@@ -36,7 +36,7 @@ public class GameOverController implements Initializable {
 
     public void playBackgroundMusic() {
         try {
-            InputStream audioSrc = getClass().getResourceAsStream("/sounds/gameOver.wav");
+            InputStream audioSrc = getClass().getResourceAsStream("/sounds/winGame.wav");
             AudioInputStream audioInputStream = AudioSystem.getAudioInputStream(new BufferedInputStream(audioSrc));
             backgroundMusic = AudioSystem.getClip();
             backgroundMusic.open(audioInputStream);
@@ -48,7 +48,7 @@ public class GameOverController implements Initializable {
     }
 
     @FXML
-    private void onTryAgainButton() throws IOException {
+    private void onPlayAgainButton() throws IOException {
         MainApplication mainApp = MainApplication.getInstance();
         mainApp.changeSceneTryPlayAgain();
         backgroundMusic.stop();

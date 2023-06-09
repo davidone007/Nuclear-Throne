@@ -87,7 +87,7 @@ public class MainController implements Initializable {
         screens.add(new Scenario_1(canvas));
         screens.add(new Scenario_2(canvas));
         screens.add(new Scenario_3(canvas));
-        actualScreen = 3;// Cambioooooooooooo
+        actualScreen = 3; // Cambioooooooooooo
 
         font = Font.loadFont(getClass().getResourceAsStream("/fonts/Super Mario Bros. 2.ttf"), 20);
         pointerImage = new Image(getClass().getResourceAsStream("/animations/pointer/pointer.png"));
@@ -130,6 +130,16 @@ public class MainController implements Initializable {
         // Poner musica de fondo
         playBackgroundMusic();
 
+        // Configurar evento de cierre de la ventana
+        MainApplication.getInstance().getPrimaryStage().setOnCloseRequest(event -> {
+            // Detener todos los procesos y cerrar la aplicación
+            isRunning = false;
+            avatar.setIsAlive(false);
+            killAllEnemies();
+            backgroundMusic.stop();
+            Platform.exit();
+        });
+
     }
 
     public void playBackgroundMusic() {
@@ -147,9 +157,20 @@ public class MainController implements Initializable {
 
     public void gameOver() {
         killAllEnemies();
+        avatar.setIsAlive(false);
         isRunning = false;
         MainApplication mainApp = MainApplication.getInstance();
         mainApp.changeSceneGameOver();
+        backgroundMusic.stop();
+
+    }
+
+    public void gameWin() {
+        killAllEnemies();
+        avatar.setIsAlive(false);
+        isRunning = false;
+        MainApplication mainApp = MainApplication.getInstance();
+        mainApp.changeSceneGameWin();
         backgroundMusic.stop();
 
     }
@@ -549,7 +570,7 @@ public class MainController implements Initializable {
                     actualEnemy.setState(0);
                     actualEnemy.paint();
 
-                    gameOver();
+                    gameWin();
 
                     break;
                 } else {
