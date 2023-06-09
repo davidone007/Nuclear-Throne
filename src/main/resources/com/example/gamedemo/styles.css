@@ -1,8 +1,12 @@
 /* Estilos para el Pane principal */
 #main-pane {
-    -fx-background-image: url('Srr.png');
     -fx-background-repeat: no-repeat;
     -fx-background-size: 100% auto;
+}
+
+/* Estilos para el MediaView */
+.media-view {
+    -fx-background-color: black;
 }
 
 /* Estilos para el botón "Play" */
@@ -53,6 +57,10 @@
 .dialog-pane .dialog-header .graphic-container {
     -fx-padding: 0;
 }
+
+.play-button, .exit-button {
+    -fx-z-index: 1;
+  }
 
 .dialog-pane .dialog-header .graphic-container .graphic {
     -fx-background-color: transparent;

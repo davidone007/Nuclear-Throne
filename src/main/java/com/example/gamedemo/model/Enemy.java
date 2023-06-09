@@ -3,8 +3,6 @@ package com.example.gamedemo.model;
 import javafx.scene.canvas.Canvas;
 import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.image.Image;
-import javafx.scene.input.KeyEvent;
-import javafx.scene.input.MouseEvent;
 import javafx.scene.shape.Rectangle;
 
 import java.util.ArrayList;
@@ -47,7 +45,7 @@ public class Enemy implements Runnable {
         this.canvas = canvas;
         this.graphicsContext = canvas.getGraphicsContext2D();
         this.avatar = avatar;
-        this.hitbox = new Rectangle(posX, posY, 140, 100);
+        this.hitbox = new Rectangle(posX, posY, 100, 100);
 
         this.position = position;
 
@@ -66,6 +64,16 @@ public class Enemy implements Runnable {
 
     }
 
+    public void sleep() {
+        try {
+            paint();
+            Thread.sleep(500);
+        } catch (InterruptedException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
+    }
+
     @Override
     public void run() {
         while (isAlive) {
@@ -80,26 +88,53 @@ public class Enemy implements Runnable {
 
     public void follow() {
 
-        if (avatar.getState() >= 0 && avatar.getState() <= 3) {
-            state = avatar.getState();
-        }
-
+        
         // Calcular la dirección hacia la cual moverse
         double diffX = avatar.getPosition().getX() - position.getX();
         double diffY = avatar.getPosition().getY() - position.getY();
 
-        int avatarState= avatar.getState();
-        if(diffX>0){
-            if(avatarState==0 || avatarState==2){
-                state=avatarState;
-            }else if(avatarState==1 || avatarState==3){
-                state=avatarState-1;
+        int avatarState = avatar.getState();
+        if (diffX > 0) {
+            if (avatarState == 0 || avatarState == 2) {
+                if (avatar.getState() == 0) {
+                    state = 2;
+                }else{
+                    state = avatarState;
+                }
+            } else if (avatarState == 1 || avatarState == 3) {
+                if (avatar.getState() == 1) {
+                    state = 2;
+                }else{
+                    state = avatarState - 1;
+                }
+                
             }
-        }else{
-            if(avatarState==0 || avatarState==2){
-                state=avatarState+1;
-            }else if(avatarState==1 || avatarState==3){
-                state=avatarState;
+        } else {
+            if (avatarState == 0 || avatarState == 2) {
+                if (avatar.getState() == 0) {
+                    state = 3;
+                }else{
+                    state = avatarState + 1;
+                }
+                
+            } else if (avatarState == 1 || avatarState == 3) {
+                if (avatar.getState() == 1) {
+                    state = 3;
+                }else{
+                    state = avatarState;
+                }
+            }
+        }
+
+        if (avatar.getHitbox().intersects(hitbox.getBoundsInParent())) {
+            if (state == 2) {
+                state = (4);
+                paint();
+
+            } else if (state == 3) {
+                state = (5);
+                paint();
+
             }
         }
 
@@ -109,7 +144,7 @@ public class Enemy implements Runnable {
         double directionY = diffY / distance;
 
         // Actualizar la posición del enemigo
-        double speed = 7; // Ajusta la velocidad de movimiento del enemigo si es necesario
+        double speed = 4; // Ajusta la velocidad de movimiento del enemigo si es necesario
         position.setX(position.getX() + directionX * speed);
         position.setY(position.getY() + directionY * speed);
         hitbox.setX(position.getX() + directionX * speed);
@@ -186,6 +221,7 @@ public class Enemy implements Runnable {
             graphicsContext.drawImage(deadImages.get(frame % 4), position.getX(), position.getY());
             frame++;
         }
+
     }
 
     public void onMove() {
@@ -480,7 +516,6 @@ public class Enemy implements Runnable {
     public void setIsAlive(boolean isAlive) {
         this.isAlive = isAlive;
     }
-
 
     /**
      * @return Avatar return the avatar

@@ -3,7 +3,7 @@ package com.example.gamedemo.model;
 import javafx.scene.canvas.Canvas;
 import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.image.Image;
-import javafx.scene.paint.Color;
+import javafx.scene.shape.Rectangle;
 
 public class BoxWeapon implements Runnable{
 
@@ -16,10 +16,12 @@ public class BoxWeapon implements Runnable{
     private int size;
     private int weapon;
     private Image typeBullet;
+    private Rectangle hitbox;
 
     public BoxWeapon(Canvas canvas, Vector position, int weapon, int size) {
         this.weapon = weapon;
         this.canvas = canvas;
+        this.hitbox = new Rectangle(position.getX(), position.getY(),size,size);
         this.graphicsContext = canvas.getGraphicsContext2D();
         this.position = position;
         this.size = size;
@@ -41,6 +43,8 @@ public class BoxWeapon implements Runnable{
         graphicsContext.drawImage(typeBullet, position.getX(), position.getY(), size, size);
         position.setX(position.getX());
         position.setY(position.getY());
+        hitbox.setX(position.getX());
+        hitbox.setY(position.getY());
 
     }
 
@@ -121,6 +125,21 @@ public class BoxWeapon implements Runnable{
      */
     public void setTypeBullet(Image typeBullet) {
         this.typeBullet = typeBullet;
+    }
+
+
+    /**
+     * @return Rectangle return the hitbox
+     */
+    public Rectangle getHitbox() {
+        return hitbox;
+    }
+
+    /**
+     * @param hitbox the hitbox to set
+     */
+    public void setHitbox(Rectangle hitbox) {
+        this.hitbox = hitbox;
     }
 
 }

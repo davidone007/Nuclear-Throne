@@ -1,28 +1,26 @@
 <?xml version="1.0" encoding="UTF-8"?>
-
 <?import javafx.geometry.Insets?>
 <?import javafx.scene.control.Button?>
 <?import javafx.scene.layout.AnchorPane?>
 <?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.StackPane?>
 
-<AnchorPane id="main-pane" stylesheets="@styles.css" xmlns="http://javafx.com/javafx/19"
-    xmlns:fx="http://javafx.com/fxml/1"
-    fx:controller="com.example.gamedemo.control.WelcomeController">
+<AnchorPane id="main-pane" stylesheets="@styles.css" xmlns="http://javafx.com/javafx/20.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.example.gamedemo.control.WelcomeController">
     <children>
-        <HBox id="hbox" alignment="CENTER" layoutX="-1.0" layoutY="-1.0" spacing="100.0"
-            AnchorPane.bottomAnchor="10.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0"
-            AnchorPane.topAnchor="10.0">
+        <StackPane fx:id="mediaContainer" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0" />
+
+        <HBox id="hbox" alignment="CENTER" layoutX="-1.0" layoutY="-1.0" spacing="100.0" AnchorPane.bottomAnchor="10.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="10.0">
             <children>
-                <Button onAction="#onPlayButton" styleClass="play-button" text="Play">
+                <Button layoutX="500.0" layoutY="700.0" onAction="#onPlayButton" styleClass="play-button" text="Play">
                     <padding>
                         <Insets bottom="10" left="20" right="20" top="10" />
                     </padding>
+                    <HBox.margin>
+                        <Insets />
+                    </HBox.margin>
                 </Button>
                 <Button onAction="#onExitButton" styleClass="exit-button" text="Exit" />
             </children>
-            <padding>
-                <Insets bottom="50.0" />
-            </padding>
         </HBox>
     </children>
 </AnchorPane>

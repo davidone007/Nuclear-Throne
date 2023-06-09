@@ -1,11 +1,9 @@
 package com.example.gamedemo.model;
 
-import javafx.scene.ImageCursor;
 import javafx.scene.canvas.Canvas;
 import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.image.Image;
 import javafx.scene.input.KeyEvent;
-import javafx.scene.input.MouseButton;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.shape.Rectangle;
 
@@ -52,11 +50,11 @@ public class Avatar implements Runnable{
         this.canvas = canvas;
         this.graphicsContext = canvas.getGraphicsContext2D();
         this.isAlive= true;
-        this.hitbox = new Rectangle(0, 0, 100, 100); 
+        this.hitbox = new Rectangle(0, 0, 70, 120); 
 
         this.position = new Vector(100, 100);
 
-        this.posX = 900;
+        this.posX = 100;
         this.posY = 100;
         this.lives = 5;
 
@@ -231,7 +229,12 @@ public class Avatar implements Runnable{
                 break;
             case D:
                 if(leftPressed || upPressed || downPressed){
-                    state=state;
+                    if(leftPressed){
+                        state=3;
+                    }else{
+                        state=state;
+                    }
+                    
                     rightPressed = false;
                     break;
                 }
@@ -240,7 +243,11 @@ public class Avatar implements Runnable{
                 break;
             case A:
                 if(rightPressed || upPressed || downPressed){
-                    state=state;
+                    if(rightPressed){
+                        state=2;
+                    }else{
+                        state=state;
+                    }
                     leftPressed = false;
                     break;
                 }
