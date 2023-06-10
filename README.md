@@ -55,7 +55,7 @@ To run the "https://github.com/davidone007/Nuclear-Throne.git" game on your loca
 
 ## Contribution
 
-If you would like to contribute to the development of "NUCLEAR THRONE," please follow these steps:
+If you would like to contribute to the development of "NUCLEAR THRONE" please follow these steps:
 
 1. Fork this repository.
 
